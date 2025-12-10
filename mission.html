@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미션 수행 - FindMyRide</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
+    <style>
+        /* ... 기존 스타일 유지 ... */
+        :root { --main-blue: #457b9d; --dark-blue: #1d3557; --bg-color: #fafafa; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--dark-blue); display: flex; flex-direction: column; min-height: 100vh; }
+
+        header {
+            background: #fff; padding: 18px 80px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); cursor: pointer; }
+        nav a { text-decoration: none; color: var(--dark-blue); margin-left: 30px; font-weight: 600; }
+
+        .mission-container {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 40px;
+        }
+
+        .mission-card {
+            background: white; width: 100%; max-width: 500px;
+            padding: 50px 30px; border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .icon-area { font-size: 80px; margin-bottom: 20px; }
+        h2 { font-size: 2rem; margin-bottom: 15px; color: var(--main-blue); }
+        p { font-size: 1.1rem; color: #666; margin-bottom: 30px; line-height: 1.6; }
+
+        .interaction-area {
+            background: #f1f5f9; padding: 30px; border-radius: 15px; margin-bottom: 20px;
+            border: 2px dashed #cbd5e1; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+        }
+        .interaction-area:hover { background: #e2e8f0; border-color: var(--main-blue); }
+        .interaction-text { font-size: 14px; color: #94a3b8; font-weight: bold; }
+
+        .gov-link-box {
+            margin-bottom: 20px; font-size: 13px; color: #555; background: #eff6ff;
+            padding: 15px; border-radius: 10px; border: 1px solid #bfdbfe; text-align: left;
+        }
+        .gov-link-box a { color: #2563eb; font-weight: bold; text-decoration: none; display: block; margin-top: 5px; }
+        .gov-link-box a:hover { text-decoration: underline; }
+
+        .btn-group { display: flex; gap: 10px; justify-content: center; }
+        button { padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; }
+        .confirm-btn { background-color: #94a3b8; color: white; width: 60%; cursor: not-allowed; }
+        .cancel-btn { background-color: #e2e8f0; color: #64748b; }
+
+        footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; margin-top: auto; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo" onclick="location.href='Index.html'">FindMyRide</div>
+        <nav>
+            <a href="Index.html">홈</a>
+            <a href="test2.html">대여소 찾기</a>
+            <a href="test3_mypage.html">마이페이지</a>
+        </nav>
+    </header>
+
+    <div class="mission-container">
+        <div class="mission-card">
+            <div class="icon-area" id="mission-icon">❓</div>
+            <h2 id="mission-title">미션 로딩중...</h2>
+            <p id="mission-desc">잠시만 기다려주세요.</p>
+
+            <div class="interaction-area" onclick="document.getElementById('file-input').click()">
+                <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                
+                <div id="preview-placeholder">
+                    <div style="font-size:40px; margin-bottom:10px;">📸</div>
+                    <div class="interaction-text" id="action-text">여기를 눌러 인증 사진 촬영/업로드</div>
+                </div>
+                <img id="preview-img" style="max-width:100%; border-radius:10px; display:none;">
+            </div>
+
+            <div class="gov-link-box">
+                📢 <strong>잠깐! 실제 포인트도 받으셨나요?</strong><br>
+                이 앱에서의 나무 성장과 별개로, 정부 공식 '탄소중립실천포인트' 제도 가입 후 현금 혜택도 꼭 챙기세요!
+                <a href="https://www.cpoint.or.kr/" target="_blank">👉 탄소중립포인트 공식 홈페이지 바로가기</a>
+            </div>
+
+            <div class="btn-group">
+                <button class="cancel-btn" onclick="history.back()">취소</button>
+                <button class="confirm-btn" id="submit-btn" onclick="submitReview()" disabled>심사 요청하기</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>캡스톤디자인 4차산업혁명 융합프로젝트2</p>
+    </footer>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+
+        const content = {
+            'tumbler': { icon: '🥤', title: '텀블러 인증', desc: '카페에서 텀블러를 사용하는 모습을<br>사진으로 찍어주세요!', point: 50 },
+            'bus': { icon: '🚌', title: '대중교통 인증', desc: '버스/지하철 단말기나 하차 모습을<br>사진으로 남겨주세요.', point: 200 },
+            'food': { icon: '🥡', title: '용기내 챌린지', desc: '다회용기에 음식을 포장한<br>용기 인증샷을 남겨주세요.', point: 300 },
+            'mail': { icon: '📧', title: '메일함 비우기', desc: '스팸메일을 삭제한 화면을<br>캡쳐해서 올려주세요.', point: 10 }
+        };
+
+        const data = content[type] || content['tumbler'];
+        document.getElementById('mission-icon').innerText = data.icon;
+        document.getElementById('mission-title').innerText = data.title;
+        document.getElementById('mission-desc').innerHTML = data.desc;
+
+        // [중요] 이미지 데이터를 임시 저장할 변수
+        let imageDataString = null;
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    // 읽어온 이미지 데이터를 변수에 저장
+                    imageDataString = e.target.result;
+
+                    document.getElementById('preview-img').src = imageDataString;
+                    document.getElementById('preview-img').style.display = 'block';
+                    document.getElementById('preview-placeholder').style.display = 'none';
+                    
+                    const btn = document.getElementById('submit-btn');
+                    btn.disabled = false;
+                    btn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--main-blue');
+                    btn.style.cursor = 'pointer';
+                    btn.innerText = "관리자에게 심사 요청";
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function submitReview() {
+            let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
+            
+            const newRequest = {
+                id: Date.now(),
+                type: type,
+                name: data.title,
+                point: data.point,
+                status: 'pending',
+                date: new Date().toLocaleDateString(),
+                // [중요] 이미지 데이터도 함께 저장
+                image: imageDataString 
+            };
+            
+            // 용량 초과 에러 방지를 위한 try-catch
+            try {
+                reviewList.push(newRequest);
+                localStorage.setItem('reviewList', JSON.stringify(reviewList));
+                alert("✅ 심사 요청 완료!\n관리자 승인 후 포인트가 지급됩니다.");
+                location.href = 'Index.html';
+            } catch (e) {
+                alert("⚠️ 이미지 용량이 너무 큽니다!\n데모 버전에서는 저용량 이미지나 캡처 화면을 사용해주세요.");
+                console.error("Storage failed:", e);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMyRide - 나만의 작은 숲</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
+    <style>
+        :root {
+            --main-blue: #457b9d;
+            --light-blue: #a8dadc;
+            --dark-blue: #1d3557;
+            --bg-color: #fafafa;
+            --tree-green: #2ecc71;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--dark-blue); 
+            display: flex; flex-direction: column; min-height: 100vh; 
+        }
+
+        /* 헤더 스타일 */
+        header {
+            width: 100%; background: #fff;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 80px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 10;
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); }
+        nav a {
+            text-decoration: none; color: var(--dark-blue); margin-left: 30px; font-weight: 600; transition: color 0.2s;
+        }
+        nav a:hover { color: var(--main-blue); }
+
+        /* 메인 레이아웃 */
+        .dashboard-container {
+            flex: 1; max-width: 1200px; margin: 40px auto; width: 90%;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+        }
+
+        /* 왼쪽: 나무 섹션 */
+        .tree-section {
+            background: white; padding: 50px; border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            text-align: center; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; height: 100%; border: 1px solid #eee;
+        }
+
+        #tree-display {
+            font-size: 150px; margin: 30px 0;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+        }
+        .grow-animation { transform: scale(1.2); }
+
+        .score-badge {
+            background-color: var(--light-blue); color: var(--dark-blue);
+            padding: 10px 20px; border-radius: 30px; font-weight: 700;
+            font-size: 1.1rem; margin-bottom: 20px; display: inline-block;
+        }
+
+        .progress-container {
+            width: 80%; background-color: #e5e7eb; border-radius: 15px;
+            height: 30px; overflow: hidden; position: relative; margin-bottom: 10px;
+        }
+        #progress-fill {
+            background-color: var(--tree-green); height: 100%; width: 0%;
+            transition: width 0.5s ease-out;
+        }
+        #progress-text {
+            position: absolute; width: 100%; top: 50%; left: 0; 
+            transform: translateY(-50%); text-align: center;
+            font-size: 14px; font-weight: bold; color: #fff; text-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+
+        /* 오른쪽: 컨트롤 섹션 */
+        .control-section { display: flex; flex-direction: column; gap: 20px; }
+        .welcome-text h2 { font-size: 2rem; margin-bottom: 10px; color: var(--dark-blue); }
+        .welcome-text p { color: #666; font-size: 1.1rem; line-height: 1.6; }
+
+        .action-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px;
+        }
+
+        .action-btn {
+            background-color: white; border: 2px solid #e0e0e0; border-radius: 16px;
+            padding: 25px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 15px; text-align: left;
+        }
+        .action-btn:hover {
+            border-color: var(--main-blue); background-color: #f0f9ff;
+            transform: translateY(-3px); box-shadow: 0 5px 15px rgba(69, 123, 157, 0.15);
+        }
+
+        .action-btn .icon { font-size: 32px; }
+        .action-btn .text-area { display: flex; flex-direction: column; }
+        .action-btn .label { font-size: 16px; font-weight: 700; color: var(--dark-blue); }
+        .action-btn .sub { font-size: 13px; color: #888; margin-top: 4px; }
+
+        .bike-btn {
+            grid-column: span 2; background: linear-gradient(120deg, var(--main-blue), var(--dark-blue));
+            border: none; color: white;
+        }
+        .bike-btn:hover { background: linear-gradient(120deg, var(--dark-blue), var(--main-blue)); color: white; }
+        .bike-btn .label { color: white; }
+        .bike-btn .sub { color: #e0e0e0; }
+
+        .admin-link { text-align: right; margin-top: 20px; font-size: 13px; color: #999; }
+        .admin-link a { color: #666; text-decoration: underline; cursor: pointer; }
+        
+        footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; margin-top: auto; }
+        
+        @media (max-width: 768px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            header { padding: 15px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">FindMyRide</div>
+        <nav>
+            <a href="Index.html" style="color:var(--main-blue);">홈</a>
+            <a href="test2.html">대여소 찾기</a>
+            <a href="test3_mypage.html">마이페이지</a>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <section class="tree-section">
+            <div class="score-badge">오늘 줄인 탄소: <span id="score">0</span>g</div>
+            <div id="tree-display" onclick="pokeTree()">🌱</div>
+            <h3 id="level-name" style="margin-bottom: 15px; color:var(--dark-blue);">Level 1. 파릇파릇 새싹</h3>
+            <div class="progress-container">
+                <div id="progress-fill"></div>
+                <div id="progress-text">0%</div>
+            </div>
+            <p style="color:#888; font-size: 14px; margin-top:10px;">나무를 클릭해서 사랑을 주세요!</p>
+        </section>
+
+        <section class="control-section">
+            <div class="welcome-text">
+                <h2>오늘의 탄소 중립 미션 🌳</h2>
+                <p>미션을 인증하고 관리자 승인을 기다려주세요.<br>
+                승인이 완료되면 나무가 자랍니다!</p>
+            </div>
+
+            <div class="action-grid">
+                <button class="action-btn" onclick="goToMission('tumbler')">
+                    <span class="icon">🥤</span>
+                    <div class="text-area">
+                        <span class="label">텀블러 사용</span>
+                        <span class="sub">인증 시 +50g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="goToMission('bus')">
+                    <span class="icon">🚌</span>
+                    <div class="text-area">
+                        <span class="label">대중교통 이용</span>
+                        <span class="sub">인증 시 +200g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="goToMission('food')">
+                    <span class="icon">🥡</span>
+                    <div class="text-area">
+                        <span class="label">용기내 챌린지</span>
+                        <span class="sub">인증 시 +300g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="location.href='pedometer.html'">
+                    <span class="icon">👟</span>
+                    <div class="text-area">
+                        <span class="label">걷기 (만보기)</span>
+                        <span class="sub">30걸음 시 +10g</span>
+                    </div>
+                </button>
+
+                <button class="action-btn bike-btn" onclick="goToBikeMap()">
+                    <span class="icon">🚲</span>
+                    <div class="text-area">
+                        <span class="label">내 주변 따릉이 찾으러 가기</span>
+                        <span class="sub">지도 확인하고 돌아오면 +500g</span>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="admin-link">
+                <a onclick="resetData()">데이터 초기화</a> | 
+                <a href="admin.html" target="_blank">⚙️ 관리자 페이지(시연용)</a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>캡스톤디자인 4차산업혁명 융합프로젝트2</p>
+    </footer>
+
+    <script>
+        let totalScore = 0;
+        const maxLevelScore = 1000;
+
+        window.onload = function() {
+            // 1. 기존 점수 불러오기
+            const savedScore = localStorage.getItem('myForestScore');
+            if (savedScore) totalScore = parseInt(savedScore);
+
+            // 2. 관리자 승인 여부 확인하기
+            checkApprovedReviews();
+
+            // 3. 자전거 지도 확인 여부
+            const isRiding = localStorage.getItem('isRiding');
+            if (isRiding === 'true') {
+                if(confirm("🚲 따릉이 지도 잘 보셨나요?\n실제로 이용하셨다면 확인을 눌러 500g을 받으세요!")) {
+                    addCarbonPoint(500);
+                }
+                localStorage.removeItem('isRiding');
+            }
+
+            // 4. [NEW] 만보기 완료 확인
+            const walkingSuccess = localStorage.getItem('walkingSuccess');
+            if (walkingSuccess === 'true') {
+                const points = parseInt(localStorage.getItem('walkingPoints'));
+                addCarbonPoint(points);
+                alert(`🚶 걷기 미션 성공!\n건강도 챙기고 탄소 ${points}g도 줄였어요!`);
+                
+                // 데이터 정리 (계속 점수 받지 않도록)
+                localStorage.removeItem('walkingSuccess');
+                localStorage.removeItem('walkingPoints');
+            }
+
+            updateUI();
+        };
+
+        // 관리자가 승인한 건이 있는지 체크하는 함수
+        function checkApprovedReviews() {
+            let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
+            let newPoints = 0;
+            let approvedCount = 0;
+
+            const updatedList = reviewList.map(item => {
+                if (item.status === 'approved' && !item.claimed) {
+                    newPoints += item.point;
+                    approvedCount++;
+                    return { ...item, claimed: true };
+                }
+                return item;
+            });
+
+            if (approvedCount > 0) {
+                localStorage.setItem('reviewList', JSON.stringify(updatedList));
+                addCarbonPoint(newPoints);
+                alert(`🎉 관리자 승인 완료! \n${approvedCount}건의 미션이 확인되어 탄소 ${newPoints}g이 적립되었습니다.`);
+            }
+        }
+
+        function addCarbonPoint(point) {
+            totalScore += point;
+            saveData();
+            updateUI();
+            animateTree();
+        }
+
+        function goToMission(type) {
+            location.href = `mission.html?type=${type}`;
+        }
+
+        function goToBikeMap() {
+            localStorage.setItem('isRiding', 'true');
+            location.href = 'test2.html';
+        }
+
+        function animateTree() {
+            const tree = document.getElementById('tree-display');
+            tree.classList.remove('grow-animation');
+            void tree.offsetWidth;
+            tree.classList.add('grow-animation');
+        }
+        
+        function pokeTree() { animateTree(); }
+
+        function updateUI() {
+            document.getElementById('score').innerText = totalScore;
+            let percentage = (totalScore / maxLevelScore) * 100;
+            if(percentage > 100) percentage = 100;
+            
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').innerText = Math.floor(percentage) + '%';
+
+            const treeDisplay = document.getElementById('tree-display');
+            const levelName = document.getElementById('level-name');
+
+            if (totalScore < 100) {
+                treeDisplay.innerText = "🌱";
+                levelName.innerText = "Level 1. 파릇파릇 새싹";
+            } else if (totalScore < 400) {
+                treeDisplay.innerText = "🌿";
+                levelName.innerText = "Level 2. 쑥쑥 자란 묘목";
+            } else if (totalScore < 800) {
+                treeDisplay.innerText = "🌳";
+                levelName.innerText = "Level 3. 튼튼한 나무";
+            } else {
+                treeDisplay.innerText = "🌲";
+                levelName.innerText = "Level 4. 울창한 숲의 주인!";
+            }
+        }
+
+        function saveData() { localStorage.setItem('myForestScore', totalScore); }
+
+        function resetData() {
+            if(confirm("모든 데이터(점수, 인증기록)를 초기화 하시겠습니까?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

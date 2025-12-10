@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - FindMyRide</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background: #1e293b; color: white; padding: 40px; max-width: 900px; margin: 0 auto; }
+        h1 { border-bottom: 1px solid #475569; padding-bottom: 20px; margin-bottom: 30px; }
+        
+        .request-item {
+            background: #334155; padding: 20px; border-radius: 12px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 20px; /* 아이템 사이 간격 */
+        }
+        
+        /* [추가] 증거 사진 스타일 */
+        .proof-img {
+            width: 100px; height: 100px; /* 정사각형 썸네일 */
+            object-fit: cover; /* 비율 유지하며 꽉 채우기 */
+            border-radius: 8px; border: 2px solid #475569;
+            cursor: pointer; /* 클릭 가능 표시 */
+            transition: transform 0.2s;
+        }
+        .proof-img:hover { transform: scale(1.1); } /* 마우스 올리면 살짝 커짐 */
+
+        .info-container { flex: 1; } /* 남은 공간 차지 */
+        .info-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .info-sub { font-size: 0.9rem; color: #94a3b8; }
+        
+        button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; white-space: nowrap; }
+        .approve-btn { background: #22c55e; color: white; }
+        .approve-btn:hover { background: #16a34a; transform: scale(1.05); }
+        
+        .empty-msg { color: #94a3b8; text-align: center; margin-top: 50px; font-size: 1.1rem; }
+        .back-link { display: block; margin-top: 30px; color: #38bdf8; text-decoration: none; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>🛡️ 탄소중립 인증 승인 관리</h1>
+    <p style="color:#cbd5e1; margin-bottom: 30px;">사용자가 제출한 증거 사진을 확인하고 승인하세요.</p>
+
+    <div id="list-container">
+        </div>
+
+    <a href="Index.html" class="back-link">← 사용자 앱으로 돌아가기</a>
+
+    <script>
+        function loadRequests() {
+            const container = document.getElementById('list-container');
+            const reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
+            
+            const pendingList = reviewList.filter(item => item.status === 'pending');
+
+            if (pendingList.length === 0) {
+                container.innerHTML = "<div class='empty-msg'>현재 대기 중인 인증 요청이 없습니다.</div>";
+                return;
+            }
+
+            let html = '';
+            pendingList.forEach(item => {
+                // [이미지 태그 추가] item.image 데이터를 src에 넣음
+                // 이미지가 없을 경우를 대비한 대체 이미지(onerror) 처리 추가
+                html += `
+                    <div class="request-item">
+                        <img src="${item.image}" class="proof-img" onclick="window.open(this.src)" title="클릭해서 원본 보기" onerror="this.src='https://via.placeholder.com/100x100?text=No+Image'">
+                        
+                        <div class="info-container">
+                            <div class="info-title">📸 ${item.name}</div>
+                            <div class="info-sub">요청일: ${item.date} | 지급 예정: ${item.point}g</div>
+                        </div>
+                        <button class="approve-btn" onclick="approveItem(${item.id})">승인 처리</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function approveItem(id) {
+            let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
+            
+            const updatedList = reviewList.map(item => {
+                if (item.id === id) {
+                    return { ...item, status: 'approved' };
+                }
+                return item;
+            });
+
+            localStorage.setItem('reviewList', JSON.stringify(updatedList));
+            alert("✅ 승인 처리되었습니다.\n사용자가 앱에 접속하면 포인트가 지급됩니다.");
+            loadRequests();
+        }
+
+        window.onload = loadRequests;
+    </script>
+</body>
+</html>
