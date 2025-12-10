@@ -23,17 +23,93 @@
         }
 
         /* 헤더 스타일 */
-        header {
-            width: 100%; background: #fff;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 18px 80px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            position: sticky; top: 0; z-index: 10;
-        }
-        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); }
-        nav a {
-            text-decoration: none; color: var(--dark-blue); margin-left: 30px; font-weight: 600; transition: color 0.2s;
-        }
-        nav a:hover { color: var(--main-blue); }
+        /* --- 반응형 헤더 스타일 --- */
+header {
+    width: 100%;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* 지도보다 위에 오도록 높게 설정 */
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--dark-blue);
+    text-decoration: none;
+    z-index: 1002; /* 햄버거 메뉴보다 위에 */
+}
+
+/* 메뉴 리스트 (PC 버전 기본) */
+.nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--dark-blue);
+    font-weight: 600;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--main-blue);
+}
+
+/* 햄버거 아이콘 (PC에선 숨김) */
+.hamburger {
+    display: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--dark-blue);
+    z-index: 1002;
+    background: none;
+    border: none;
+    padding: 5px;
+}
+
+/* --- 모바일 반응형 (768px 이하일 때) --- */
+@media (max-width: 768px) {
+    header {
+        padding: 15px 20px; /* 패딩 줄임 */
+    }
+
+    .hamburger {
+        display: block; /* 햄버거 보이기 */
+    }
+
+    .nav-links {
+        /* 평소엔 숨겨둠 */
+        position: fixed;
+        top: 0;
+        right: -100%; /* 오른쪽 화면 밖으로 밀어둠 */
+        height: 100vh;
+        width: 250px; /* 메뉴 너비 */
+        background-color: white;
+        flex-direction: column; /* 세로 정렬 */
+        align-items: flex-start;
+        padding: 80px 30px; /* 상단 여백 (X버튼 공간) */
+        gap: 25px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        transition: right 0.3s ease-in-out; /* 부드러운 슬라이드 효과 */
+        z-index: 1001;
+    }
+
+    /* 클래스가 추가되면 나타남 */
+    .nav-links.active {
+        right: 0;
+    }
+}
 
         /* 메인 레이아웃 */
         .dashboard-container {
@@ -122,12 +198,18 @@
 <body>
 
     <header>
-        <div class="logo">FindMyRide</div>
-        <nav>
-            <a href="Index.html" style="color:var(--main-blue);">홈</a>
-            <a href="test2.html">대여소 찾기</a>
-            <a href="test3_mypage.html">마이페이지</a>
-        </nav>
+        <a href="Index.html" class="logo">FindMyRide</a>
+        
+        <button class="hamburger" onclick="toggleMenu()">
+            ☰
+        </button>
+    
+        <ul class="nav-links" id="nav-links">
+            <li><a href="Index.html">홈</a></li>
+            <li><a href="test2.html">대여소 찾기</a></li>
+            <li><a href="test3_mypage.html">마이페이지</a></li>
+            <li><a href="#">공지사항</a></li>
+            </ul>
     </header>
 
     <div class="dashboard-container">
@@ -200,6 +282,31 @@
     </footer>
 
     <script>
+        // 햄버거 메뉴 토글 함수
+function toggleMenu() {
+    const nav = document.getElementById('nav-links');
+    const btn = document.querySelector('.hamburger');
+    
+    // 메뉴에 'active' 클래스를 넣었다 뺐다 함
+    nav.classList.toggle('active');
+
+    // 아이콘 모양 변경 (☰ <-> X)
+    if (nav.classList.contains('active')) {
+        btn.innerHTML = "✕"; // 닫기 아이콘
+    } else {
+        btn.innerHTML = "☰"; // 햄버거 아이콘
+    }
+}
+
+// (추가 기능) 메뉴 링크를 클릭하면 모바일 메뉴가 자동으로 닫히게 하기
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        const nav = document.getElementById('nav-links');
+        const btn = document.querySelector('.hamburger');
+        nav.classList.remove('active');
+        btn.innerHTML = "☰";
+    });
+});
         let totalScore = 0;
         const maxLevelScore = 1000;
 
