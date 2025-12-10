@@ -110,7 +110,7 @@
         // 2. 민감도 설정: 이 값보다 큰 충격이 와야 걸음으로 인정
         // 값이 클수록 세게 걸어야 함 (너무 낮으면 손떨림도 인식됨)
         // 보통 걷기 가속도는 1.2G ~ 1.5G 정도 나옵니다.
-        const THRESHOLD = 3.0; 
+        const THRESHOLD = 2.7; 
 
         function requestPermission() {
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
