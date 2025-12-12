@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FindMyRide</title>
+  <title>대여소 찾기 - FindMyRide</title>
 
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
   <style>
@@ -12,119 +12,157 @@
       --light-blue: #a8dadc;
       --dark-blue: #1d3557;
       --bg-color: #fafafa;
-      --fav-color: #e63946; /* 즐겨찾기 색상 (빨강) */
+      --fav-color: #e63946;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     body { background-color: var(--bg-color); color: var(--dark-blue); }
 
+    /* --- 헤더 --- */
     header {
       width: 100%;
       background: #fff;
       display: flex; justify-content: space-between; align-items: center;
-      padding: 18px 80px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      position: sticky; top: 0; z-index: 10;
+      padding: 15px 5%; /* 모바일 대응을 위해 % 사용 */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      position: sticky; top: 0; z-index: 20;
     }
-    .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); }
+    .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); white-space: nowrap; }
+    nav { display: flex; gap: 20px; }
     nav a {
       text-decoration: none; color: var(--dark-blue);
-      margin-left: 30px; font-weight: 600; transition: color 0.2s;
+      font-weight: 600; transition: color 0.2s; white-space: nowrap;
+      font-size: 15px;
     }
     nav a:hover { color: var(--main-blue); }
 
-    .hero { background: linear-gradient(120deg, var(--light-blue), var(--main-blue)); color: white; text-align: center; padding: 40px 20px; position: relative; }
-    #map { width: 100%; height: 500px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    /* --- 검색창 디자인 (수정됨) --- */
+    .search-wrapper {
+        position: absolute;
+        top: 20px; left: 50%; transform: translateX(-50%);
+        z-index: 100;
+        width: 90%; max-width: 420px; /* 최대 너비 설정 */
+    }
+
+    .search-container {
+        background: #fff;
+        border-radius: 50px; /* 둥근 캡슐 모양 */
+        padding: 6px; /* 내부 여백 */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        display: flex; 
+        align-items: center; /* 수직 중앙 정렬 */
+        justify-content: space-between;
+        border: 2px solid transparent; /* 포커스 효과를 위한 투명 테두리 */
+        transition: all 0.3s ease;
+    }
+
+    /* 검색창 클릭 시 강조 효과 */
+    .search-container:focus-within {
+        border-color: var(--main-blue);
+        box-shadow: 0 6px 20px rgba(69, 123, 157, 0.2);
+    }
+    
+    #keyword {
+        flex: 1; /* 남은 공간 모두 차지 */
+        border: none;
+        background: transparent;
+        padding: 10px 15px;
+        font-size: 16px;
+        outline: none; /* 기본 테두리 제거 */
+        min-width: 0; /* flexbox 내에서 입력창이 넘치는 것 방지 */
+    }
+    
+    .search-btn {
+        background: var(--main-blue);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 40px; /* 버튼도 둥글게 */
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 15px;
+        flex-shrink: 0; /* 버튼 크기가 줄어들지 않도록 고정 */
+        transition: background 0.2s;
+        margin-left: 5px; /* 입력창과 버튼 사이 간격 */
+    }
+    .search-btn:hover { background: var(--dark-blue); }
+
+    /* 연관 검색어 박스 */
+    .suggestion-box {
+        background: white;
+        margin-top: 8px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        max-height: 250px;
+        overflow-y: auto;
+        display: none;
+        padding: 10px 0;
+        animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .suggestion-item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+        display: flex; align-items: center;
+        font-size: 14px;
+        transition: background 0.1s;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover { background-color: #f0f9ff; }
+    .s-id { font-weight: bold; color: var(--main-blue); margin-right: 10px; min-width: 40px; }
+    .s-name { color: #333; flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* --- 지도 영역 --- */
+    .hero { 
+        position: relative; 
+        height: calc(100vh - 70px); 
+        width: 100%;
+    }
+    #map { width: 100%; height: 100%; }
 
     .loading-message {
-      position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-      background: rgba(255,255,255,0.95); padding: 12px 24px;
-      border-radius: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-      font-size: 14px; font-weight: 600; color: var(--dark-blue);
-      z-index: 5; display: none;
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(29, 53, 87, 0.9); padding: 12px 24px;
+      border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      font-size: 14px; font-weight: 600; color: white;
+      z-index: 15; display: none; white-space: nowrap;
     }
 
-    /* 오버레이 스타일 */
+    /* 오버레이 (말풍선) */
     .custom-overlay {
-      position: relative;
-      background: white;
-      border-radius: 16px;
-      padding: 14px 18px;
-      box-shadow: 0 3px 14px rgba(0,0,0,0.25);
-      border: 2px solid var(--main-blue);
-      min-width: 220px;
-      transition: all 0.2s;
+      position: relative; background: white; border-radius: 16px;
+      padding: 14px 18px; box-shadow: 0 3px 14px rgba(0,0,0,0.25);
+      border: 2px solid var(--main-blue); min-width: 220px;
     }
     .custom-overlay::after {
-      content: '';
-      position: absolute;
-      bottom: -10px; left: 50%; transform: translateX(-50%);
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-top: 10px solid white;
+      content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+      border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid white;
     }
-    
     .overlay-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;
     }
-    .overlay-title {
-      font-weight: 700;
-      color: var(--dark-blue);
-      font-size: 15px;
-      text-align: left;
-      margin-right: 10px;
-      word-break: keep-all;
-    }
-    
-    /* 즐겨찾기 별 버튼 스타일 */
-    .fav-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 20px;
-        color: #ccc;
-        transition: color 0.2s;
-        padding: 0;
-        line-height: 1;
-    }
-    .fav-btn.active {
-        color: #ffc107; /* 꽉 찬 별 색상 */
-    }
-    .fav-btn:hover {
-        transform: scale(1.1);
-    }
-
-    .overlay-info {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 13px;
-    }
-    .info-box {
-      flex: 1;
-      background: #f6f8fa;
-      border-radius: 10px;
-      padding: 6px 0;
-      text-align: center;
-    }
-    .info-label {
-      color: #777;
-      font-size: 12px;
-    }
-    .info-value {
-      font-weight: 700;
-      font-size: 18px;
-      margin-top: 2px;
-    }
+    .overlay-title { font-weight: 700; color: var(--dark-blue); font-size: 15px; margin-right: 10px; }
+    .fav-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: #ccc; padding: 0; }
+    .fav-btn.active { color: #ffc107; }
+    .overlay-info { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+    .info-box { flex: 1; background: #f6f8fa; border-radius: 10px; padding: 6px 0; text-align: center; }
+    .info-label { color: #777; font-size: 12px; }
+    .info-value { font-weight: 700; font-size: 18px; margin-top: 2px; }
     .info-value.low { color: #ff5252; }
     .info-value.medium { color: #ffa726; }
     .info-value.high { color: #2ecc71; }
 
-    footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; }
+    /* 반응형 처리 */
+    @media (max-width: 768px) {
+        header { padding: 15px 20px; }
+        nav { gap: 15px; }
+        nav a { margin-left: 0; font-size: 14px; }
+        .search-btn { padding: 8px 18px; font-size: 14px; }
+        .search-wrapper { width: 95%; }
+    }
   </style>
 </head>
 
@@ -133,242 +171,264 @@
     <div class="logo">FindMyRide</div>
     <nav>
       <a href="Index.html">홈</a>
-      <a href="test2.html">대여소 찾기</a>
+      <a href="test2.html" style="color:var(--main-blue);">대여소 찾기</a>
       <a href="test3_mypage.html">마이페이지</a>
-      <a href="Notice.html">공지사항</a>
-      <a href="CS.html">고객센터</a>
     </nav>
   </header>
 
   <section class="hero">
-    <div class="loading-message" id="loadingMsg">🚴 대여소 정보 불러오는 중...</div>
+    <div class="search-wrapper">
+        <div class="search-container">
+            <input type="text" id="keyword" placeholder="장소 검색 (예: 강남역, 2301)" 
+                   autocomplete="off"
+                   onkeyup="checkKeyword()" onkeypress="if(event.keyCode==13) performSearch();">
+            <button class="search-btn" onclick="performSearch()">검색</button>
+        </div>
+        <div id="suggestion-box" class="suggestion-box"></div>
+    </div>
+
+    <div class="loading-message" id="loadingMsg" style="display:block;">📍 내 위치와 주변 따릉이를 찾는 중...</div>
     <div id="map"></div>
   </section>
 
-  <footer>
-    <p>캡스톤디자인 4차산업혁명 융합프로젝트2</p>
-    <p>2300336@student.hywoman.ac.kr | (82) 123-4567</p>
-    <p>한양여자대학교 소프트웨어융합과</p>
-  </footer>
-
-  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=dbb43de48b1358f249618a62dade6804"></script>
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=dbb43de48b1358f249618a62dade6804&libraries=services"></script>
 
   <script>
     let map, userMarker, userCircle, currentOverlay = null;
+    let ps; 
     const SEOUL_API_KEY = '55554254706e757238356a6d44556d';
-    let stationMarkers = []; // 마커 객체들을 담을 배열
-    let cachedStationsData = []; // API에서 받아온 데이터를 저장할 배열 (재렌더링용)
     
-    // 로컬 스토리지 키
+    let stationMarkers = []; 
+    let cachedStationsData = []; 
+    let allStationList = []; 
+
     const FAV_STORAGE_KEY = 'findmyride_favorites';
 
-    // 즐겨찾기 목록 불러오기 (ID 배열)
-    function getFavorites() {
-        const stored = localStorage.getItem(FAV_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    // 즐겨찾기 저장하기
-    function saveFavorites(favArray) {
-        localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(favArray));
-    }
-
-    // 즐겨찾기 토글 함수
-    function toggleFavorite(stationId) {
-        let favorites = getFavorites();
-        if (favorites.includes(stationId)) {
-            // 이미 있으면 삭제
-            favorites = favorites.filter(id => id !== stationId);
+    // --- 페이지 로드 시 위치 확인 ---
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    initMap(lat, lng);
+                },
+                function(error) {
+                    alert("위치 정보를 가져올 수 없어 서울시청으로 이동합니다.");
+                    initMap(37.5665, 126.9780);
+                },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
         } else {
-            // 없으면 추가
-            favorites.push(stationId);
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+            initMap(37.5665, 126.9780);
         }
-        saveFavorites(favorites);
-        
-        // 마커 및 오버레이 갱신
-        refreshMapMarkers(); 
+    };
+
+    function initMap(lat, lng) {
+        const container = document.getElementById('map');
+        const options = { center: new kakao.maps.LatLng(lat, lng), level: 4 };
+
+        map = new kakao.maps.Map(container, options);
+        ps = new kakao.maps.services.Places();
+
+        // 내 위치 마커
+        const userImage = new kakao.maps.MarkerImage(
+            'https://cdn-icons-png.flaticon.com/512/3177/3177361.png', 
+            new kakao.maps.Size(40, 40)
+        );
+        userMarker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(lat, lng), map: map, image: userImage, zIndex: 10
+        });
+        userCircle = new kakao.maps.Circle({
+            center: new kakao.maps.LatLng(lat, lng),
+            radius: 50, strokeWeight: 2, strokeColor: '#457b9d', strokeOpacity: 0.8, fillColor: '#a8dadc', fillOpacity: 0.3
+        });
+        userCircle.setMap(map);
+
+        loadBikeStations(lat, lng);
     }
 
+    async function loadBikeStations(centerLat, centerLng) {
+        const loadingMsg = document.getElementById('loadingMsg');
+        loadingMsg.innerText = "🚴 주변 자전거 정보를 가져오는 중...";
+        loadingMsg.style.display = 'block';
+
+        try {
+            const PROXY = "https://api.allorigins.win/raw?url=";
+            const apiUrl = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/1/1000/`;
+
+            const response = await fetch(`${PROXY}${encodeURIComponent(apiUrl)}`);
+            const data = await response.json();
+            
+            if(!data.rentBikeStatus) throw new Error("데이터 오류");
+
+            const stations = data.rentBikeStatus.row;
+            allStationList = stations; 
+
+            cachedStationsData = stations.map(station => {
+                const distance = getDistance(centerLat, centerLng, parseFloat(station.stationLatitude), parseFloat(station.stationLongitude));
+                return { ...station, distance };
+            })
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, 15);
+
+            refreshMapMarkers();
+            loadingMsg.style.display = 'none';
+
+        } catch (e) {
+            console.error('로드 실패:', e);
+            loadingMsg.textContent = '데이터를 불러오지 못했습니다.';
+            setTimeout(() => (loadingMsg.style.display = 'none'), 3000);
+        }
+    }
+
+    // --- 검색 로직 ---
+    function checkKeyword() {
+        const keyword = document.getElementById('keyword').value.trim();
+        const suggestionBox = document.getElementById('suggestion-box');
+        
+        if (keyword.length === 0) {
+            suggestionBox.style.display = 'none';
+            return;
+        }
+
+        const matches = allStationList.filter(s => {
+            return s.stationName.includes(keyword) || s.stationId.includes(keyword);
+        }).slice(0, 5); 
+
+        if (matches.length > 0) {
+            let html = '';
+            matches.forEach(s => {
+                html += `
+                    <div class="suggestion-item" onclick="moveToStation('${s.stationLatitude}', '${s.stationLongitude}', '${s.stationName}')">
+                        <span class="s-id">🚲</span>
+                        <span class="s-name">${s.stationName}</span>
+                    </div>
+                `;
+            });
+            suggestionBox.innerHTML = html;
+            suggestionBox.style.display = 'block';
+        } else {
+            suggestionBox.style.display = 'none';
+        }
+    }
+
+    // 연관 검색어 클릭 -> 해당 대여소 핀으로 이동
+    function moveToStation(lat, lng, name) {
+        const targetLat = parseFloat(lat);
+        const targetLng = parseFloat(lng);
+        
+        const moveLatLon = new kakao.maps.LatLng(targetLat, targetLng);
+        map.setCenter(moveLatLon);
+        map.setLevel(3); 
+
+        document.getElementById('keyword').value = name;
+        document.getElementById('suggestion-box').style.display = 'none';
+
+        // 해당 지역 주변 데이터 새로고침
+        loadBikeStations(targetLat, targetLng);
+    }
+
+    // 엔터/검색버튼 클릭 -> 일반 지역 검색 (지도 이동만)
+    function performSearch() {
+        const keyword = document.getElementById('keyword').value.trim();
+        document.getElementById('suggestion-box').style.display = 'none';
+
+        if (!keyword) {
+            alert('검색어를 입력해주세요!');
+            return;
+        }
+
+        // 카카오 장소 검색 실행
+        ps.keywordSearch(keyword, function(data, status, pagination) {
+            if (status === kakao.maps.services.Status.OK) {
+                const targetLat = data[0].y;
+                const targetLng = data[0].x;
+                
+                const moveLatLon = new kakao.maps.LatLng(targetLat, targetLng);
+                map.setCenter(moveLatLon);
+                map.setLevel(4);
+                
+                // 이동한 지역의 자전거 로드
+                loadBikeStations(targetLat, targetLng);
+            } else {
+                alert('검색 결과가 없거나 오류가 발생했습니다.');
+            }
+        });
+    }
+
+    // --- 유틸리티 ---
     function getDistance(lat1, lng1, lat2, lng2) {
       const R = 6371e3;
       const toRad = deg => deg * (Math.PI / 180);
-      const φ1 = toRad(lat1);
-      const φ2 = toRad(lat2);
-      const Δφ = toRad(lat2 - lat1);
-      const Δλ = toRad(lng2 - lng1);
-      const a = Math.sin(Δφ / 2) ** 2 +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) ** 2;
+      const φ1 = toRad(lat1); const φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1); const Δλ = toRad(lng2 - lng1);
+      const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
-    function initMap(lat, lng) {
-      map = new kakao.maps.Map(document.getElementById('map'), {
-        center: new kakao.maps.LatLng(lat, lng),
-        level: 5
-      });
-
-      const userImage = new kakao.maps.MarkerImage(
-        'https://cdn-icons-png.flaticon.com/512/3177/3177361.png', 
-        new kakao.maps.Size(40, 40)
-      );
-
-      userMarker = new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(lat, lng),
-        map,
-        image: userImage,
-        zIndex: 10
-      });
-
-      userCircle = new kakao.maps.Circle({
-        center: new kakao.maps.LatLng(lat, lng),
-        radius: 50,
-        strokeWeight: 2,
-        strokeColor: '#457b9d',
-        strokeOpacity: 0.8,
-        fillColor: '#a8dadc',
-        fillOpacity: 0.3
-      });
-      userCircle.setMap(map);
-
-      loadBikeStations(lat, lng);
-    }
-
-    function updatePosition(position) {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      if (!map) initMap(lat, lng);
-      const newPos = new kakao.maps.LatLng(lat, lng);
-      userMarker.setPosition(newPos);
-      userCircle.setPosition(newPos);
-      map.setCenter(newPos);
-    }
-
-    function handleError(err) {
-      console.error(err);
-      initMap(37.5665, 126.9780);
-    }
-
-    async function loadBikeStations(userLat, userLng) {
-      const loadingMsg = document.getElementById('loadingMsg');
-      loadingMsg.style.display = 'block';
-
-      try {
-        const PROXY = "https://api.allorigins.win/raw?url=";
-        const apiUrl = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/1/1000/`;
-
-        const response = await fetch(`${PROXY}${encodeURIComponent(apiUrl)}`);
-        const data = await response.json();
-        const stations = data.rentBikeStatus.row;
-
-        // 거리 계산 및 정렬
-        cachedStationsData = stations.map(station => {
-          const distance = getDistance(
-            userLat, userLng,
-            parseFloat(station.stationLatitude),
-            parseFloat(station.stationLongitude)
-          );
-          return { ...station, distance };
-        }).sort((a, b) => a.distance - b.distance).slice(0, 10);
-
-        // 마커 그리기
-        refreshMapMarkers();
-
-        loadingMsg.style.display = 'none';
-      } catch (e) {
-        console.error('대여소 정보 로드 실패:', e);
-        loadingMsg.textContent = '⚠️ 대여소 정보를 불러올 수 없습니다';
-        setTimeout(() => (loadingMsg.style.display = 'none'), 3000);
-      }
-    }
-
-    // 마커를 전부 지우고 새로 그리는 함수 (즐겨찾기 상태 변경 시 호출)
     function refreshMapMarkers() {
-        // 기존 마커 제거
         stationMarkers.forEach(m => m.setMap(null));
         stationMarkers = [];
-
-        // 오버레이가 열려있다면 닫아줌 (상태 갱신을 위해)
         if (currentOverlay) currentOverlay.setMap(null);
-
-        // 캐시된 데이터로 다시 그림
         cachedStationsData.forEach(station => createStationMarker(station));
     }
 
     function createStationMarker(station) {
       const pos = new kakao.maps.LatLng(station.stationLatitude, station.stationLongitude);
       const favorites = getFavorites();
-      const isFav = favorites.includes(station.stationId); // stationId 기준 판단
-
-      // 아이콘 분기 처리 (즐겨찾기: 빨간 핀, 일반: 파란 핀)
-      const normalIconUrl = "https://cdn-icons-png.flaticon.com/512/2776/2776067.png"; // 파란색
-      const favIconUrl = "https://cdn-icons-png.flaticon.com/512/2776/2776063.png"; // 빨간색
-      
-      const iconUrl = isFav ? favIconUrl : normalIconUrl;
+      const isFav = favorites.includes(station.stationId);
+      const iconUrl = isFav ? "https://cdn-icons-png.flaticon.com/512/2776/2776063.png" : "https://cdn-icons-png.flaticon.com/512/2776/2776067.png";
       const markerImage = new kakao.maps.MarkerImage(iconUrl, new kakao.maps.Size(34, 34));
-
       const marker = new kakao.maps.Marker({ position: pos, map, image: markerImage });
-      
-      // 클릭 시 오버레이 표시
       kakao.maps.event.addListener(marker, 'click', () => showStationInfo(station, marker));
       stationMarkers.push(marker);
     }
 
     function showStationInfo(station, marker) {
       if (currentOverlay) currentOverlay.setMap(null);
-
-      const remain = station.parkingBikeTotCnt;
-      const total = station.rackTotCnt;
-      const available = total - remain;
+      const remain = parseInt(station.parkingBikeTotCnt);
+      const total = parseInt(station.rackTotCnt);
       const favorites = getFavorites();
       const isFav = favorites.includes(station.stationId);
+      let valueClass = remain == 0 ? 'low' : (remain < 3 ? 'medium' : 'high');
 
-      let valueClass = 'high';
-      if (remain == 0) valueClass = 'low';
-      else if (remain < 5) valueClass = 'medium';
-
-      // 오버레이 HTML 구성
       const content = `
         <div class="custom-overlay">
           <div class="overlay-header">
             <div class="overlay-title">${station.stationName}</div>
-            <button class="fav-btn ${isFav ? 'active' : ''}" 
-                    onclick="toggleFavorite('${station.stationId}')" 
-                    title="즐겨찾기">
-              ${isFav ? '★' : '☆'}
-            </button>
+            <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${station.stationId}')">${isFav ? '★' : '☆'}</button>
           </div>
           <div class="overlay-info">
-            <div class="info-box">
-              <div class="info-label">대여 가능</div>
-              <div class="info-value ${valueClass}">${remain}</div>
-            </div>
-            <div class="info-box">
-              <div class="info-label">반납 가능</div>
-              <div class="info-value">${available}</div>
-            </div>
+            <div class="info-box"><div class="info-label">대여 가능</div><div class="info-value ${valueClass}">${remain}</div></div>
+            <div class="info-box"><div class="info-label">거치대 수</div><div class="info-value">${total}</div></div>
           </div>
         </div>`;
-
-      const overlay = new kakao.maps.CustomOverlay({
-        content, position: marker.getPosition(), yAnchor: 1.5
-      });
+      const overlay = new kakao.maps.CustomOverlay({ content, position: marker.getPosition(), yAnchor: 1.4 });
       overlay.setMap(map);
       currentOverlay = overlay;
-      map.setCenter(marker.getPosition());
+      map.panTo(marker.getPosition());
     }
 
-    window.onload = function() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(updatePosition, handleError, {
-          enableHighAccuracy: true, timeout: 10000, maximumAge: 0
-        });
-      } else {
-        alert("브라우저가 위치 정보를 지원하지 않습니다.");
-        initMap(37.5665, 126.9780);
-      }
-    };
+    function getFavorites() {
+        const stored = localStorage.getItem(FAV_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    }
+    function saveFavorites(favArray) {
+        localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(favArray));
+    }
+    function toggleFavorite(stationId) {
+        let favorites = getFavorites();
+        if (favorites.includes(stationId)) {
+            favorites = favorites.filter(id => id !== stationId);
+        } else {
+            favorites.push(stationId);
+        }
+        saveFavorites(favorites);
+        refreshMapMarkers(); 
+    }
   </script>
 </body>
 </html>
