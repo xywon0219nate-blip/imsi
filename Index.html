@@ -6,181 +6,383 @@
     <title>FindMyRide - 나만의 작은 숲</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
-        /* (스타일은 기존과 동일합니다. 편의상 줄여둡니다.) */
-        :root { --main-blue: #457b9d; --bg-color: #fafafa; --tree-green: #2ecc71; }
-        body { background-color: var(--bg-color); font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-        
-        header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.2rem; }
-        
-        /* 로그인 버튼 스타일 */
-        #login-btn { background: #4285F4; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        #user-info { display: none; font-size: 14px; }
-        #logout-link { color: #999; text-decoration: underline; cursor: pointer; margin-left: 10px; font-size: 12px; }
+        :root {
+            --main-blue: #457b9d;
+            --light-blue: #a8dadc;
+            --dark-blue: #1d3557;
+            --bg-color: #fafafa;
+            --tree-green: #2ecc71;
+        }
 
-        .dashboard-container { max-width: 800px; margin: 20px auto; width: 90%; text-align: center; }
-        .tree-section { background: white; padding: 40px; border-radius: 20px; margin-bottom: 20px; }
-        #tree-display { font-size: 100px; margin: 20px 0; display: block; }
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 15px; border-radius: 10px; border: 1px solid #ddd; background: white; cursor: pointer; }
-        button:hover { background: #f0f9ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--dark-blue); 
+            display: flex; flex-direction: column; min-height: 100vh; 
+        }
+
+        /* --- 헤더 스타일 --- */
+        header {
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; z-index: 1002; }
+
+        /* 로그인 관련 버튼 스타일 */
+        .auth-container { display: flex; align-items: center; gap: 10px; z-index: 1002; }
+        #login-btn { 
+            background: #4285F4; color: white; border: none; padding: 8px 16px; 
+            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
+        }
+        #user-profile { display: none; align-items: center; gap: 10px; font-size: 14px; }
+        #logout-btn { 
+            background: #eee; color: #555; border: none; padding: 5px 10px; 
+            border-radius: 4px; cursor: pointer; font-size: 12px; 
+        }
+
+        /* 햄버거 메뉴 */
+        .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; }
+        .nav-links { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; }
+        .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 16px; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--main-blue); }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .auth-container { margin-right: 40px; /* 햄버거 버튼 자리 확보 */ }
+            .hamburger { display: block; position: absolute; right: 20px; }
+            .nav-links {
+                position: fixed; top: 0; right: -100%; height: 100vh; width: 250px;
+                background-color: white; flex-direction: column; align-items: flex-start;
+                padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+                transition: right 0.3s ease-in-out; z-index: 1001;
+            }
+            .nav-links.active { right: 0; }
+        }
+
+        /* 대시보드 */
+        .dashboard-container { flex: 1; max-width: 1200px; margin: 40px auto; width: 90%; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .tree-section { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; border: 1px solid #eee; }
+        #tree-display { font-size: 150px; margin: 30px 0; transition: transform 0.3s; cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
+        .grow-animation { transform: scale(1.2); }
+        .score-badge { background-color: var(--light-blue); color: var(--dark-blue); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: inline-block; }
+        .progress-container { width: 80%; background-color: #e5e7eb; border-radius: 15px; height: 30px; overflow: hidden; position: relative; margin-bottom: 10px; }
+        #progress-fill { background-color: var(--tree-green); height: 100%; width: 0%; transition: width 0.5s ease-out; }
+        #progress-text { position: absolute; width: 100%; top: 50%; left: 0; transform: translateY(-50%); text-align: center; font-size: 14px; font-weight: bold; color: #fff; text-shadow: 0 0 4px rgba(0,0,0,0.3); }
+        
+        .control-section { display: flex; flex-direction: column; gap: 20px; }
+        .welcome-text h2 { font-size: 2rem; margin-bottom: 10px; color: var(--dark-blue); }
+        .welcome-text p { color: #666; font-size: 1.1rem; line-height: 1.6; }
+        .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .action-btn { background-color: white; border: 2px solid #e0e0e0; border-radius: 16px; padding: 25px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 15px; text-align: left; }
+        .action-btn:hover { border-color: var(--main-blue); background-color: #f0f9ff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(69, 123, 157, 0.15); }
+        .action-btn .icon { font-size: 32px; }
+        .action-btn .text-area { display: flex; flex-direction: column; }
+        .action-btn .label { font-size: 16px; font-weight: 700; color: var(--dark-blue); }
+        .action-btn .sub { font-size: 13px; color: #888; margin-top: 4px; }
+        .bike-btn { grid-column: span 2; background: linear-gradient(120deg, var(--main-blue), var(--dark-blue)); border: none; color: white; }
+        .bike-btn:hover { background: linear-gradient(120deg, var(--dark-blue), var(--main-blue)); color: white; }
+        .bike-btn .label { color: white; }
+        .bike-btn .sub { color: #e0e0e0; }
+        
+        .admin-link { text-align: right; margin-top: 20px; font-size: 13px; color: #999; }
+        .admin-link a { color: #666; text-decoration: underline; cursor: pointer; }
+        footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; margin-top: auto; }
+        
+        @media (max-width: 768px) { .dashboard-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">FindMyRide</div>
-        <div>
-            <button id="login-btn">G 구글 로그인</button>
-            <div id="user-info">
-                <span id="user-name"></span>님 환영합니다!
-                <span id="logout-link">로그아웃</span>
+        <a href="Index.html" class="logo">FindMyRide</a>
+        
+        <div class="auth-container">
+            <button id="login-btn">G 로그인</button>
+            <div id="user-profile">
+                <span id="user-name"></span>
+                <button id="logout-btn">로그아웃</button>
             </div>
         </div>
+
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+    
+        <ul class="nav-links" id="nav-links">
+            <li><a href="Index.html">홈</a></li>
+            <li><a href="test2.html">대여소 찾기</a></li>
+            <li><a href="test3_mypage.html">마이페이지</a></li>
+            <li><a href="Notice.html">공지사항</a></li>
+        </ul>
     </header>
 
     <div class="dashboard-container">
         <section class="tree-section">
-            <div>오늘 줄인 탄소: <strong id="score">0</strong>g</div>
-            <div id="tree-display">🌱</div>
-            <h3 id="level-name">로그인이 필요합니다</h3>
-            <p style="color:#888; font-size:14px;">로그인하면 내 나무가 저장돼요!</p>
+            <div class="score-badge">오늘 줄인 탄소: <span id="score">0</span>g</div>
+            <div id="tree-display" onclick="pokeTree()">🌱</div>
+            <h3 id="level-name" style="margin-bottom: 15px; color:var(--dark-blue);">로그인이 필요합니다</h3>
+            <div class="progress-container">
+                <div id="progress-fill"></div>
+                <div id="progress-text">0%</div>
+            </div>
+            <p style="color:#888; font-size: 14px; margin-top:10px;">로그인하고 나만의 나무를 키워보세요!</p>
         </section>
 
-        <div class="action-grid">
-            <button onclick="addPoints(50)">🥤 텀블러 (+50g)</button>
-            <button onclick="addPoints(200)">🚌 대중교통 (+200g)</button>
-            <button onclick="alert('준비중')">🚲 따릉이 지도</button>
-            <button onclick="resetData()">🔄 초기화</button>
-        </div>
+        <section class="control-section">
+            <div class="welcome-text">
+                <h2>오늘의 탄소 중립 미션 🌳</h2>
+                <p>미션을 인증하고 관리자 승인을 기다려주세요.<br>
+                승인이 완료되면 나무가 자랍니다!</p>
+            </div>
+
+            <div class="action-grid">
+                <button class="action-btn" onclick="goToMission('tumbler')">
+                    <span class="icon">🥤</span>
+                    <div class="text-area">
+                        <span class="label">텀블러 사용</span>
+                        <span class="sub">인증 시 +50g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="goToMission('bus')">
+                    <span class="icon">🚌</span>
+                    <div class="text-area">
+                        <span class="label">대중교통 이용</span>
+                        <span class="sub">인증 시 +200g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="goToMission('food')">
+                    <span class="icon">🥡</span>
+                    <div class="text-area">
+                        <span class="label">용기내 챌린지</span>
+                        <span class="sub">인증 시 +300g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="location.href='pedometer.html'">
+                    <span class="icon">👟</span>
+                    <div class="text-area">
+                        <span class="label">걷기 (만보기)</span>
+                        <span class="sub">30걸음 시 +10g</span>
+                    </div>
+                </button>
+
+                <button class="action-btn bike-btn" onclick="goToBikeMap()">
+                    <span class="icon">🚲</span>
+                    <div class="text-area">
+                        <span class="label">내 주변 따릉이 찾으러 가기</span>
+                        <span class="sub">지도 확인하고 돌아오면 +500g</span>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="admin-link">
+                <a onclick="resetData()">데이터 초기화</a> | 
+                <a href="admin.html" target="_blank">⚙️ 관리자 페이지(시연용)</a>
+            </div>
+        </section>
     </div>
 
+    <footer>
+        <p>캡스톤디자인 4차산업혁명 융합프로젝트2</p>
+    </footer>
+
     <script type="module">
-        // 1. 파이어베이스 라이브러리 가져오기 (CDN)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 2. ★여기에 아까 메모장에 복사한 내 앱 정보를 붙여넣으세요!★
-        // (apiKey부터 appId까지 있는 부분)
+        // ========================================================
+        // [중요] 아래 firebaseConfig 안에 본인의 키를 붙여넣으세요!
+        // ========================================================
         const firebaseConfig = {
-          apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
-          authDomain: "capstone-a39ed.firebaseapp.com",
-          projectId: "capstone-a39ed",
-          storageBucket: "capstone-a39ed.firebasestorage.app",
-          messagingSenderId: "522941456140",
-          appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
+            apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
+            authDomain: "capstone-a39ed.firebaseapp.com",
+            projectId: "capstone-a39ed",
+            storageBucket: "capstone-a39ed.firebasestorage.app",
+            messagingSenderId: "522941456140",
+            appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
         };
+        // ========================================================
 
-
-        // 3. 파이어베이스 실행
+        // 파이어베이스 초기화
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app); // 로그인 담당
-        const db = getFirestore(app); // 데이터베이스 담당
-        const provider = new GoogleAuthProvider(); // 구글 로그인 도구
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-        // 전역 변수 (내 점수)
         let myScore = 0;
-        let myUid = null; // 나의 고유 ID
+        let myUid = null;
+        const maxLevelScore = 1000;
 
-        // --- 로그인 버튼 클릭 시 ---
-        document.getElementById('login-btn').addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    console.log("로그인 성공!", result.user);
-                }).catch((error) => {
-                    console.error("로그인 실패", error);
-                });
-        });
-
-        // --- 로그아웃 클릭 시 ---
-        document.getElementById('logout-link').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                alert("로그아웃 되었습니다.");
-                location.reload();
+        // 1. 로그인 버튼
+        const loginBtn = document.getElementById('login-btn');
+        if(loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                signInWithPopup(auth, provider).catch((error) => console.error(error));
             });
-        });
+        }
 
-        // --- 로그인 상태 감지 (핵심!) ---
-        // 웹사이트에 들어왔을 때, 이 사람이 로그인한 상태인지 확인
+        // 2. 로그아웃 버튼
+        const logoutBtn = document.getElementById('logout-btn');
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                signOut(auth).then(() => {
+                    alert("로그아웃 되었습니다.");
+                    location.reload();
+                });
+            });
+        }
+
+        // 3. 로그인 상태 감지 (핵심 로직)
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // 로그인 된 상태
-                myUid = user.uid; // 내 주민등록번호 같은 고유 ID
-                
-                // 화면 바꾸기
+                // 로그인 성공
+                myUid = user.uid;
                 document.getElementById('login-btn').style.display = 'none';
-                document.getElementById('user-info').style.display = 'block';
+                document.getElementById('user-profile').style.display = 'flex';
                 document.getElementById('user-name').innerText = user.displayName;
 
-                // DB에서 내 점수 가져오기
+                // 파이어베이스에서 점수 불러오기
                 await loadMyData();
+                
+                // 로그인 후에만 미션 결과 체크 (localStorage에 있던 임시 데이터 처리)
+                checkPendingMissions();
             } else {
                 // 로그아웃 상태
-                document.getElementById('level-name').innerText = "로그인 해주세요";
+                document.getElementById('login-btn').style.display = 'block';
+                document.getElementById('user-profile').style.display = 'none';
+                document.getElementById('level-name').innerText = "로그인이 필요합니다";
+                updateUI(0); // 점수 0으로 표시
             }
         });
 
-        // --- 데이터 불러오기 함수 ---
+        // 내 데이터 불러오기
         async function loadMyData() {
-            // 'users'라는 폴더 안에서 '내 ID'로 된 문서를 찾음
             const docRef = doc(db, "users", myUid);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                // 데이터가 있으면 가져와서 화면에 보여줌
-                myScore = docSnap.data().totalScore;
-                updateUI();
+                myScore = docSnap.data().totalScore || 0;
             } else {
-                // 데이터가 없으면 (첫 방문) 새로 만듦
-                await setDoc(docRef, {
-                    name: auth.currentUser.displayName,
-                    totalScore: 0
-                });
+                await setDoc(docRef, { name: auth.currentUser.displayName, totalScore: 0 });
                 myScore = 0;
-                updateUI();
+            }
+            updateUI(myScore);
+        }
+
+        // 점수 추가 (서버 저장)
+        window.addPoints = async function(points) {
+            if (!myUid) return; // 로그인 안했으면 무시 (또는 경고)
+            
+            // 화면 먼저 갱신
+            myScore += points;
+            updateUI(myScore);
+
+            // 서버 저장
+            const docRef = doc(db, "users", myUid);
+            await updateDoc(docRef, { totalScore: increment(points) });
+        }
+
+        // 미션 완료했는지 체크 (localStorage 확인 -> Firestore 저장)
+        function checkPendingMissions() {
+            // 1. 관리자 승인 건
+            let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
+            let newPoints = 0;
+            let approvedCount = 0;
+
+            const updatedList = reviewList.map(item => {
+                if (item.status === 'approved' && !item.claimed) {
+                    newPoints += item.point;
+                    approvedCount++;
+                    return { ...item, claimed: true };
+                }
+                return item;
+            });
+
+            if (approvedCount > 0) {
+                localStorage.setItem('reviewList', JSON.stringify(updatedList));
+                window.addPoints(newPoints);
+                alert(`🎉 관리자 승인 완료! \n${approvedCount}건의 미션으로 ${newPoints}g 획득!`);
+            }
+
+            // 2. 자전거 지도
+            if (localStorage.getItem('isRiding') === 'true') {
+                if(confirm("🚲 따릉이 지도 확인 완료! 500g을 받으시겠습니까?")) {
+                    window.addPoints(500);
+                }
+                localStorage.removeItem('isRiding');
+            }
+
+            // 3. 만보기
+            if (localStorage.getItem('walkingSuccess') === 'true') {
+                const pts = parseInt(localStorage.getItem('walkingPoints'));
+                window.addPoints(pts);
+                alert(`🚶 걷기 미션 성공! ${pts}g 획득!`);
+                localStorage.removeItem('walkingSuccess');
+                localStorage.removeItem('walkingPoints');
             }
         }
 
-        // --- 점수 추가 함수 (HTML 버튼에서 호출) ---
-        // type="module"에서는 함수를 window에 붙여줘야 HTML에서 onclick으로 쓸 수 있음
-        window.addPoints = async function(points) {
-            if (!myUid) {
-                alert("로그인을 먼저 해주세요!");
-                return;
-            }
+        // 화면 그리기
+        function updateUI(score) {
+            document.getElementById('score').innerText = score;
+            
+            let percentage = (score / maxLevelScore) * 100;
+            if(percentage > 100) percentage = 100;
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').innerText = Math.floor(percentage) + '%';
 
-            // 1. 화면 먼저 업데이트 (빠른 반응)
-            myScore += points;
-            updateUI();
+            const treeDisplay = document.getElementById('tree-display');
+            const levelName = document.getElementById('level-name');
 
-            // 2. 서버에 저장
-            const docRef = doc(db, "users", myUid);
-            await updateDoc(docRef, {
-                totalScore: increment(points) // 기존 점수에 더하기
-            });
+            if (score < 100) { treeDisplay.innerText = "🌱"; levelName.innerText = "Level 1. 파릇파릇 새싹"; }
+            else if (score < 400) { treeDisplay.innerText = "🌿"; levelName.innerText = "Level 2. 쑥쑥 자란 묘목"; }
+            else if (score < 800) { treeDisplay.innerText = "🌳"; levelName.innerText = "Level 3. 튼튼한 나무"; }
+            else { treeDisplay.innerText = "🌲"; levelName.innerText = "Level 4. 울창한 숲의 주인!"; }
+        }
+
+        // 전역 함수로 등록 (HTML onclick에서 쓰기 위함)
+        window.toggleMenu = function() {
+            const nav = document.getElementById('nav-links');
+            const btn = document.querySelector('.hamburger');
+            nav.classList.toggle('active');
+            btn.innerHTML = nav.classList.contains('active') ? "✕" : "☰";
+        }
+        
+        window.goToMission = function(type) {
+            if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
+            location.href = `mission.html?type=${type}`;
+        }
+        
+        window.goToBikeMap = function() {
+            if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
+            localStorage.setItem('isRiding', 'true');
+            location.href = 'test2.html';
+        }
+
+        window.pokeTree = function() {
+            const tree = document.getElementById('tree-display');
+            tree.classList.remove('grow-animation');
+            void tree.offsetWidth;
+            tree.classList.add('grow-animation');
         }
 
         window.resetData = async function() {
-            if (!myUid) return;
-            if(confirm("정말 초기화 할까요?")) {
+            if(!auth.currentUser) return;
+            if(confirm("정말 모든 데이터를 초기화 하시겠습니까?")) {
                 const docRef = doc(db, "users", myUid);
                 await setDoc(docRef, { totalScore: 0 }, { merge: true });
                 myScore = 0;
-                updateUI();
+                updateUI(0);
+                localStorage.clear();
             }
-        }
-
-        // --- 화면 그리기 ---
-        function updateUI() {
-            document.getElementById('score').innerText = myScore;
-            
-            const tree = document.getElementById('tree-display');
-            const label = document.getElementById('level-name');
-
-            if(myScore < 100) { tree.innerText = "🌱"; label.innerText = "레벨1. 새싹"; }
-            else if(myScore < 500) { tree.innerText = "🌿"; label.innerText = "레벨2. 묘목"; }
-            else { tree.innerText = "🌳"; label.innerText = "레벨3. 나무"; }
         }
     </script>
 </body>
