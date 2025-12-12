@@ -6,113 +6,42 @@
     <title>FindMyRide - 나만의 작은 숲</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
-        :root {
-            --main-blue: #457b9d;
-            --light-blue: #a8dadc;
-            --dark-blue: #1d3557;
-            --bg-color: #fafafa;
-            --tree-green: #2ecc71;
-            --gold-color: #f59e0b;
-        }
-
+        /* ... 스타일은 기존과 동일하게 유지 ... */
+        :root { --main-blue: #457b9d; --light-blue: #a8dadc; --dark-blue: #1d3557; --bg-color: #fafafa; --tree-green: #2ecc71; --gold-color: #f59e0b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--dark-blue); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+        /* (스타일 코드 생략 - 기존과 동일하므로 그대로 두시면 됩니다. 아래는 핵심 변경 UI입니다.) */
+        /* ... 기존 CSS ... */
         
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--dark-blue); 
-            display: flex; flex-direction: column; min-height: 100vh; 
-            overflow-x: hidden; 
-        }
+        .floating-point { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; color: var(--gold-color); text-shadow: 0 4px 10px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; opacity: 0; animation: floatUp 1.5s ease-out forwards; }
+        .toast-message { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.9); color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10000; animation: fadeInOut 3s forwards; white-space: nowrap; }
+        
+        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -40px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -120px) scale(1); } }
+        @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%, 20px); } 10% { opacity: 1; transform: translate(-50%, 0); } 90% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -20px); } }
 
-        /* --- [수정됨] 게임 효과 스타일 --- */
-        .floating-point {
-            position: absolute;
-            /* 부모(tree-section) 기준으로 정중앙 */
-            left: 50%;
-            top: 50%; 
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--gold-color);
-            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0;
-            animation: floatUp 1.5s ease-out forwards;
-        }
-
-        .toast-message {
-            position: fixed;
-            bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(30, 41, 59, 0.9); color: white;
-            padding: 12px 24px; border-radius: 50px;
-            font-size: 14px; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10000;
-            animation: fadeInOut 3s forwards; white-space: nowrap;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-            20% { opacity: 1; transform: translate(-50%, -40px) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -120px) scale(1); }
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, 20px); }
-            10% { opacity: 1; transform: translate(-50%, 0); }
-            90% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -20px); }
-        }
-
-        /* 로딩 화면 */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 9999;
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
-            transition: opacity 0.3s;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--main-blue); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 15px;
-        }
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.3s; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 헤더 */
-        header {
-            width: 100%; background: #fff; padding: 15px 30px;
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
-        }
+        header { width: 100%; background: #fff; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; z-index: 1002; margin-right: auto; }
-        
-        .nav-links { 
-            display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; 
-            position: absolute; left: 50%; transform: translateX(-50%);
-        }
+        .nav-links { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }
         .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 16px; transition: color 0.2s; }
         .nav-links a:hover { color: var(--main-blue); }
-
         .auth-container { display: flex; align-items: center; gap: 8px; z-index: 1002; }
         .auth-btn { border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
         #signup-btn { background: var(--main-blue); color: white; }
         #signup-btn:hover { background: var(--dark-blue); }
         #login-btn { background: white; color: var(--main-blue); border: 1px solid var(--main-blue); }
         #login-btn:hover { background: #f0f9ff; }
-
         #user-profile { display: none; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; }
         #logout-btn { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
-
         .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; }
 
         @media (max-width: 768px) {
             header { padding: 15px 15px; }
-            .nav-links {
-                position: fixed; top: 0; right: -100%; left: auto; transform: none;
-                height: 100vh; width: 250px; background-color: white; flex-direction: column; align-items: flex-start;
-                padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-                transition: right 0.3s ease-in-out; z-index: 1001;
-            }
+            .nav-links { position: fixed; top: 0; right: -100%; left: auto; transform: none; height: 100vh; width: 250px; background-color: white; flex-direction: column; align-items: flex-start; padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: right 0.3s ease-in-out; z-index: 1001; }
             .nav-links.active { right: 0; }
             .hamburger { display: block; margin-left: 10px; }
             .auth-container { margin-left: auto; margin-right: 0; }
@@ -120,7 +49,6 @@
         }
 
         #landing-page, #dashboard-page { display: none; }
-
         #landing-page { text-align: center; padding: 60px 20px; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease-out; }
         .hero-title { font-size: 2.5rem; margin-bottom: 15px; line-height: 1.3; }
         .hero-title span { color: var(--tree-green); }
@@ -134,12 +62,8 @@
         .f-title { font-weight: bold; margin-bottom: 5px; font-size: 1.1rem; }
         .f-text { font-size: 0.9rem; color: #888; }
 
-        /* 대시보드 */
         .dashboard-container { flex: 1; max-width: 1200px; margin: 40px auto; width: 90%; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-        
-        /* [중요] 나무 섹션 relative 유지 -> 플로팅 텍스트 기준점 */
         .tree-section { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; border: 1px solid #eee; position: relative; overflow: hidden; }
-        
         #tree-display { font-size: 150px; margin: 30px 0; transition: transform 0.3s; cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
         .grow-animation { transform: scale(1.2); }
         .score-badge { background-color: var(--light-blue); color: var(--dark-blue); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: inline-block; }
@@ -163,11 +87,7 @@
         .admin-link { text-align: right; margin-top: 20px; font-size: 13px; color: #999; }
         .admin-link a { color: #666; text-decoration: underline; cursor: pointer; }
         footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; margin-top: auto; }
-        @media (max-width: 768px) { 
-            .dashboard-container { grid-template-columns: 1fr; } 
-            #landing-page { padding: 40px 20px; }
-            .feature-grid { grid-template-columns: 1fr; gap: 15px; }
-        }
+        @media (max-width: 768px) { .dashboard-container { grid-template-columns: 1fr; } #landing-page { padding: 40px 20px; } .feature-grid { grid-template-columns: 1fr; gap: 15px; } }
     </style>
 </head>
 <body>
@@ -219,11 +139,41 @@
         <section class="control-section">
             <div class="welcome-text"><h2>오늘의 탄소 중립 미션 🌳</h2><p>미션을 인증하고 관리자 승인을 기다려주세요.</p></div>
             <div class="action-grid">
-                <button class="action-btn" onclick="goToMission('tumbler')"><span class="icon">🥤</span><div class="text-area"><span class="label">텀블러 사용</span><span class="sub">인증 시 +50g</span></div></button>
-                <button class="action-btn" onclick="goToMission('bus')"><span class="icon">🚌</span><div class="text-area"><span class="label">대중교통 이용</span><span class="sub">인증 시 +200g</span></div></button>
-                <button class="action-btn" onclick="goToMission('food')"><span class="icon">🥡</span><div class="text-area"><span class="label">용기내 챌린지</span><span class="sub">인증 시 +300g</span></div></button>
-                <button class="action-btn" onclick="location.href='pedometer.html'"><span class="icon">👟</span><div class="text-area"><span class="label">걷기 (만보기)</span><span class="sub">30걸음 시 +10g</span></div></button>
-                <button class="action-btn bike-btn" onclick="goToBikeMap()"><span class="icon">🚲</span><div class="text-area"><span class="label">내 주변 따릉이 찾기</span><span class="sub">지도 확인 후 +500g</span></div></button>
+                <button class="action-btn" onclick="goToMission('tumbler')">
+                    <span class="icon">🥤</span>
+                    <div class="text-area">
+                        <span class="label">텀블러 사용</span>
+                        <span class="sub">인증 시 +300g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="goToMission('refill')">
+                    <span class="icon">🧴</span>
+                    <div class="text-area">
+                        <span class="label">리필스테이션 이용</span>
+                        <span class="sub">인증 시 +500g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="goToMission('receipt')">
+                    <span class="icon">🧾</span>
+                    <div class="text-area">
+                        <span class="label">전자영수증 발급</span>
+                        <span class="sub">인증 시 +100g</span>
+                    </div>
+                </button>
+                <button class="action-btn" onclick="location.href='pedometer.html'">
+                    <span class="icon">👟</span>
+                    <div class="text-area">
+                        <span class="label">걷기 (만보기)</span>
+                        <span class="sub">1,000보 당 +50g</span>
+                    </div>
+                </button>
+                <button class="action-btn bike-btn" onclick="goToBikeMap()">
+                    <span class="icon">🚲</span>
+                    <div class="text-area">
+                        <span class="label">내 주변 따릉이 찾기</span>
+                        <span class="sub">지도 확인 후 +500g</span>
+                    </div>
+                </button>
             </div>
             <div class="admin-link"><a onclick="resetData()">데이터 초기화</a> | <a href="admin.html" target="_blank">⚙️ 관리자 페이지</a></div>
         </section>
@@ -237,15 +187,15 @@
         import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ==========================================
-        // [필수] 여기에 본인의 진짜 키를 넣어야 작동합니다!
+        // [필수] 본인의 firebaseConfig 키를 여기에 다시 넣으세요!
         // ==========================================
         const firebaseConfig = {
-            apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
-            authDomain: "capstone-a39ed.firebaseapp.com",
-            projectId: "capstone-a39ed",
-            storageBucket: "capstone-a39ed.firebasestorage.app",
-            messagingSenderId: "522941456140",
-            appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
+            apiKey: "본인의_API_KEY", 
+            authDomain: "본인의_PROJECT_ID.firebaseapp.com",
+            projectId: "본인의_PROJECT_ID",
+            storageBucket: "본인의_PROJECT_ID.appspot.com",
+            messagingSenderId: "숫자ID",
+            appId: "본인의_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -305,7 +255,6 @@
 
                 if (docSnap.exists()) {
                     myUid = user.uid;
-                    
                     landingPage.style.display = 'none';
                     if(window.innerWidth > 768) dashboardPage.style.display = 'grid';
                     else dashboardPage.style.display = 'block';
@@ -337,20 +286,13 @@
             }
         });
 
-        // [수정됨] 플로팅 텍스트가 나무 박스 안에만 뜨도록 변경
         function showFloatingText(text) {
             const el = document.createElement('div');
             el.className = 'floating-point';
             el.innerText = text;
-            
-            // body가 아니라 tree-section에 추가
             const treeSection = document.querySelector('.tree-section');
-            if(treeSection) {
-                treeSection.appendChild(el);
-            } else {
-                document.body.appendChild(el); // 예외 처리
-            }
-            
+            if(treeSection) treeSection.appendChild(el);
+            else document.body.appendChild(el);
             setTimeout(() => { el.remove(); }, 1500);
         }
 
@@ -364,13 +306,10 @@
 
         window.addPoints = async function(points) {
             if (!myUid) return;
-            
             myScore += points;
             updateUI(myScore);
-            
             showFloatingText(`+${points}g`);
             window.pokeTree();
-
             const docRef = doc(db, "users", myUid);
             await updateDoc(docRef, { totalScore: increment(points) });
         }
@@ -379,7 +318,6 @@
             let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
             let newPoints = 0;
             let approvedCount = 0;
-            
             const updatedList = reviewList.map(item => {
                 if (item.status === 'approved' && !item.claimed) {
                     newPoints += item.point;
@@ -388,7 +326,6 @@
                 }
                 return item;
             });
-
             if (approvedCount > 0) {
                 localStorage.setItem('reviewList', JSON.stringify(updatedList));
                 setTimeout(() => {
@@ -396,7 +333,6 @@
                     showToast(`미션 승인 완료! ${newPoints}g 획득`);
                 }, 800);
             }
-
             if (localStorage.getItem('isRiding') === 'true') {
                 setTimeout(() => {
                     window.addPoints(500);
@@ -404,7 +340,6 @@
                 }, 1000);
                 localStorage.removeItem('isRiding');
             }
-
             if (localStorage.getItem('walkingSuccess') === 'true') {
                 const pts = parseInt(localStorage.getItem('walkingPoints'));
                 setTimeout(() => {
