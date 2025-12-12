@@ -6,17 +6,68 @@
     <title>FindMyRide - 나만의 작은 숲</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
-        /* ... 스타일은 기존과 동일하게 유지 ... */
-        :root { --main-blue: #457b9d; --light-blue: #a8dadc; --dark-blue: #1d3557; --bg-color: #fafafa; --tree-green: #2ecc71; --gold-color: #f59e0b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--dark-blue); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        :root {
+            --main-blue: #457b9d;
+            --light-blue: #a8dadc;
+            --dark-blue: #1d3557;
+            --bg-color: #fafafa;
+            --tree-green: #2ecc71;
+            --gold-color: #f59e0b;
+        }
 
-        /* (스타일 코드 생략 - 기존과 동일하므로 그대로 두시면 됩니다. 아래는 핵심 변경 UI입니다.) */
-        /* ... 기존 CSS ... */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         
-        .floating-point { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; color: var(--gold-color); text-shadow: 0 4px 10px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; opacity: 0; animation: floatUp 1.5s ease-out forwards; }
-        .toast-message { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.9); color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10000; animation: fadeInOut 3s forwards; white-space: nowrap; }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--dark-blue); 
+            display: flex; flex-direction: column; min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+
+        /* --- [팝업창 스타일 추가] --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; }
+
+        .modal-box {
+            background: white; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 350px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s;
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+
+        .modal-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .modal-desc { color: #666; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; }
         
+        .modal-input {
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-size: 16px; margin-bottom: 20px; outline: none;
+        }
+        .modal-input:focus { border-color: var(--main-blue); }
+
+        .modal-btn-group { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #f1f5f9; color: #64748b; }
+        .btn-confirm { background: var(--main-blue); color: white; }
+
+        /* --- 기존 스타일 유지 --- */
+        .floating-point {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            font-size: 3rem; font-weight: 900; color: var(--gold-color);
+            text-shadow: 0 4px 10px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999;
+            opacity: 0; animation: floatUp 1.5s ease-out forwards;
+        }
+        .toast-message {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.9); color: white; padding: 12px 24px;
+            border-radius: 50px; font-size: 14px; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10000;
+            animation: fadeInOut 3s forwards; white-space: nowrap;
+        }
         @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -40px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -120px) scale(1); } }
         @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%, 20px); } 10% { opacity: 1; transform: translate(-50%, 0); } 90% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -20px); } }
 
@@ -80,14 +131,28 @@
         .action-btn .text-area { display: flex; flex-direction: column; }
         .action-btn .label { font-size: 16px; font-weight: 700; color: var(--dark-blue); }
         .action-btn .sub { font-size: 13px; color: #888; margin-top: 4px; }
-        .bike-btn { grid-column: span 2; background: linear-gradient(120deg, var(--main-blue), var(--dark-blue)); border: none; color: white; }
-        .bike-btn:hover { background: linear-gradient(120deg, var(--dark-blue), var(--main-blue)); color: white; }
-        .bike-btn .label { color: white; }
-        .bike-btn .sub { color: #e0e0e0; }
+        
+        /* 따릉이 버튼 2개로 분할하기 위해 그리드 조정 */
+        .bike-btn-group {
+            grid-column: span 2; display: flex; gap: 10px;
+        }
+        .bike-action-btn {
+            flex: 1; background: linear-gradient(120deg, var(--main-blue), var(--dark-blue));
+            border: none; color: white; text-align: center; justify-content: center;
+        }
+        .bike-action-btn:hover { background: linear-gradient(120deg, var(--dark-blue), var(--main-blue)); color: white; }
+        .bike-action-btn .label { color: white; }
+        .bike-action-btn .sub { color: #e0e0e0; font-size: 12px; }
+
         .admin-link { text-align: right; margin-top: 20px; font-size: 13px; color: #999; }
         .admin-link a { color: #666; text-decoration: underline; cursor: pointer; }
         footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; margin-top: auto; }
-        @media (max-width: 768px) { .dashboard-container { grid-template-columns: 1fr; } #landing-page { padding: 40px 20px; } .feature-grid { grid-template-columns: 1fr; gap: 15px; } }
+        @media (max-width: 768px) { 
+            .dashboard-container { grid-template-columns: 1fr; } 
+            #landing-page { padding: 40px 20px; }
+            .feature-grid { grid-template-columns: 1fr; gap: 15px; }
+            .bike-btn-group { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
@@ -95,6 +160,22 @@
     <div id="loading-screen">
         <div class="spinner"></div>
         <p>잠시만 기다려주세요...</p>
+    </div>
+
+    <div id="ride-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">🚲 주행 인증</h3>
+            <p class="modal-desc">
+                따릉이 앱에서 확인한<br>
+                <strong>이동 거리(km)</strong>를 입력해주세요.<br>
+                (1km 당 5g 적립)
+            </p>
+            <input type="number" id="ride-km" class="modal-input" placeholder="예: 3.5" step="0.1">
+            <div class="modal-btn-group">
+                <button class="modal-btn btn-cancel" onclick="closeRideModal()">취소</button>
+                <button class="modal-btn btn-confirm" onclick="submitRide()">인증하기</button>
+            </div>
+        </div>
     </div>
 
     <header>
@@ -109,7 +190,7 @@
             <button id="signup-btn" class="auth-btn">회원가입</button>
             <button id="login-btn" class="auth-btn">로그인</button>
             <div id="user-profile">
-                <span id="user-name"></span>님 환영합니다!
+                <span id="user-name"></span>님
                 <button id="logout-btn">로그아웃</button>
             </div>
         </div>
@@ -134,46 +215,30 @@
             <div id="tree-display" onclick="pokeTree()">🌱</div>
             <h3 id="level-name">Level 1. 파릇파릇 새싹</h3>
             <div class="progress-container"><div id="progress-fill"></div><div id="progress-text">0%</div></div>
-            <p style="color:#888; font-size: 14px; margin-top:10px;">나무를 클릭해서 사랑을 주세요!</p>
+            <p style="color:#888; font-size: 14px; margin-top:10px;">탄소를 아끼고 나무를 키워주세요!</p>
         </section>
         <section class="control-section">
-            <div class="welcome-text"><h2>오늘의 탄소 중립 미션 🌳</h2><p>미션을 인증하고 관리자 승인을 기다려주세요.</p></div>
+            <div class="welcome-text"><h2>탄소 중립 미션 🌳</h2><p>미션을 인증하고 관리자 승인을 기다려주세요.</p></div>
             <div class="action-grid">
-                <button class="action-btn" onclick="goToMission('tumbler')">
-                    <span class="icon">🥤</span>
-                    <div class="text-area">
-                        <span class="label">텀블러 사용</span>
-                        <span class="sub">인증 시 +30P</span>
-                    </div>
-                </button>
-                <button class="action-btn" onclick="goToMission('refill')">
-                    <span class="icon">🧴</span>
-                    <div class="text-area">
-                        <span class="label">리필스테이션 이용</span>
-                        <span class="sub">인증 시 +200P</span>
-                    </div>
-                </button>
-                <button class="action-btn" onclick="goToMission('receipt')">
-                    <span class="icon">🧾</span>
-                    <div class="text-area">
-                        <span class="label">전자영수증 발급</span>
-                        <span class="sub">인증 시 +10P</span>
-                    </div>
-                </button>
-                <button class="action-btn" onclick="location.href='pedometer.html'">
-                    <span class="icon">👟</span>
-                    <div class="text-area">
-                        <span class="label">걷기 (만보기)</span>
-                        <span class="sub">1,000보 당 +50P</span>
-                    </div>
-                </button>
-                <button class="action-btn bike-btn" onclick="goToBikeMap()">
-                    <span class="icon">🚲</span>
-                    <div class="text-area">
-                        <span class="label">내 주변 따릉이 찾기</span>
-                        <span class="sub">따릉이 이용 km 당 +5P</span>
-                    </div>
-                </button>
+                <button class="action-btn" onclick="goToMission('tumbler')"><span class="icon">🥤</span><div class="text-area"><span class="label">텀블러 사용</span><span class="sub">인증 시 +300g</span></div></button>
+                <button class="action-btn" onclick="goToMission('refill')"><span class="icon">🧴</span><div class="text-area"><span class="label">리필스테이션 이용</span><span class="sub">인증 시 +500g</span></div></button>
+                <button class="action-btn" onclick="goToMission('receipt')"><span class="icon">🧾</span><div class="text-area"><span class="label">전자영수증 발급</span><span class="sub">인증 시 +100g</span></div></button>
+                <button class="action-btn" onclick="location.href='pedometer.html'"><span class="icon">👟</span><div class="text-area"><span class="label">걷기 (만보기)</span><span class="sub">1,000보 당 +50g</span></div></button>
+                
+                <div class="bike-btn-group">
+                    <button class="action-btn bike-action-btn" onclick="goToBikeMap()">
+                        <div class="text-area">
+                            <span class="label">🚲 대여소 찾기</span>
+                            <span class="sub">지도 보기</span>
+                        </div>
+                    </button>
+                    <button class="action-btn bike-action-btn" onclick="openRideModal()">
+                        <div class="text-area">
+                            <span class="label">📝 주행 인증</span>
+                            <span class="sub">1km당 5g 적립</span>
+                        </div>
+                    </button>
+                </div>
             </div>
             <div class="admin-link"><a onclick="resetData()">데이터 초기화</a> | <a href="admin.html" target="_blank">⚙️ 관리자 페이지</a></div>
         </section>
@@ -286,6 +351,41 @@
             }
         });
 
+        // [NEW] 모달 열기/닫기 함수 (전역)
+        window.openRideModal = function() {
+            if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
+            document.getElementById('ride-modal').classList.add('open');
+        }
+        window.closeRideModal = function() {
+            document.getElementById('ride-modal').classList.remove('open');
+            document.getElementById('ride-km').value = ""; // 입력값 초기화
+        }
+
+        // [NEW] 주행 거리 제출 함수
+        window.submitRide = function() {
+            const kmInput = document.getElementById('ride-km');
+            const km = parseFloat(kmInput.value);
+
+            if (!km || km <= 0) {
+                alert("올바른 거리를 입력해주세요!");
+                return;
+            }
+
+            // 계산: 1km 당 5g (소수점 버림)
+            const points = Math.floor(km * 5); 
+            
+            if (points === 0) {
+                alert("거리가 너무 짧아 적립될 포인트가 없습니다.");
+                return;
+            }
+
+            // 포인트 적립
+            window.addPoints(points);
+            showToast(`🚲 ${km}km 주행 인증! ${points}g 적립`);
+            
+            closeRideModal();
+        }
+
         function showFloatingText(text) {
             const el = document.createElement('div');
             el.className = 'floating-point';
@@ -333,13 +433,6 @@
                     showToast(`미션 승인 완료! ${newPoints}g 획득`);
                 }, 800);
             }
-            if (localStorage.getItem('isRiding') === 'true') {
-                setTimeout(() => {
-                    window.addPoints(500);
-                    showToast("🚲 따릉이 탐험 보상 획득!");
-                }, 1000);
-                localStorage.removeItem('isRiding');
-            }
             if (localStorage.getItem('walkingSuccess') === 'true') {
                 const pts = parseInt(localStorage.getItem('walkingPoints'));
                 setTimeout(() => {
@@ -377,7 +470,6 @@
             location.href = `mission.html?type=${type}`;
         }
         window.goToBikeMap = function() {
-            if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
             localStorage.setItem('isRiding', 'true');
             location.href = 'test2.html';
         }
