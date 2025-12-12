@@ -19,22 +19,62 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; }
 
-        /* --- 반응형 헤더 (모든 페이지 공통) --- */
+        /* --- [수정됨] 헤더 스타일 (Index.html과 통일) --- */
         header {
-            width: 100%; background: #fff;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            width: 100%;
+            background: #fff;
+            display: flex;
+            align-items: center; /* 수직 중앙 */
+            justify-content: space-between; /* 양끝 정렬 */
+            padding: 15px 30px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             position: sticky; top: 0; z-index: 1000;
         }
-        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; z-index: 1002; }
-        
-        /* 햄버거 메뉴 버튼 */
-        .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; }
 
-        /* 네비게이션 링크 */
-        .nav-links { display: flex; gap: 30px; list-style: none; }
-        .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 16px; transition: color 0.2s; }
+        .logo { 
+            font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); 
+            text-decoration: none; z-index: 1002; margin-right: auto; 
+        }
+        
+        /* 메뉴 리스트 (중앙 배치 핵심) */
+        .nav-links { 
+            display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; 
+            position: absolute; left: 50%; transform: translateX(-50%);
+        }
+        .nav-links a { 
+            text-decoration: none; color: var(--dark-blue); 
+            font-weight: 600; font-size: 16px; transition: color 0.2s; 
+        }
         .nav-links a:hover, .nav-links a.active { color: var(--main-blue); }
+
+        /* 햄버거 메뉴 (PC 숨김) */
+        .hamburger { 
+            display: none; cursor: pointer; font-size: 24px; 
+            color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px;
+        }
+
+        /* --- 모바일 반응형 --- */
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            
+            .hamburger { display: block; margin-left: auto; }
+            
+            /* 모바일 메뉴 슬라이드 */
+            .nav-links {
+                position: fixed; top: 0; right: -100%; left: auto; transform: none; /* 중앙 정렬 해제 */
+                height: 100vh; width: 250px;
+                background-color: white; flex-direction: column; align-items: flex-start;
+                padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+                transition: right 0.3s ease-in-out; z-index: 1001;
+            }
+            .nav-links.active { right: 0; }
+            
+            .notice-container { padding: 20px; width: 95%; }
+            .notice-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .notice-date { margin-left: 0; font-size: 0.8rem; margin-top: 5px; }
+            .toggle-icon { position: absolute; right: 20px; top: 25px; }
+            .notice-item { position: relative; }
+        }
 
         /* --- 공지사항 메인 컨테이너 --- */
         .notice-container {
@@ -49,23 +89,15 @@
         }
         .page-desc { color: var(--gray-text); margin-bottom: 30px; font-size: 1rem; }
 
-        /* 검색창 (장식용) */
-        .search-bar {
-            display: flex; gap: 10px; margin-bottom: 20px; justify-content: flex-end;
-        }
-        .search-input {
-            padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; width: 200px;
-        }
-        .search-btn {
-            padding: 10px 20px; background: var(--main-blue); color: white; border: none; border-radius: 5px; cursor: pointer;
-        }
+        /* 검색창 */
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; justify-content: flex-end; }
+        .search-input { padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; width: 200px; }
+        .search-btn { padding: 10px 20px; background: var(--main-blue); color: white; border: none; border-radius: 5px; cursor: pointer; }
 
-        /* --- 공지사항 리스트 (아코디언) --- */
+        /* --- 공지사항 리스트 --- */
         .notice-list { list-style: none; border-top: 2px solid var(--dark-blue); }
-        
         .notice-item { border-bottom: 1px solid var(--border-color); }
         
-        /* 질문(제목) 부분 */
         .notice-header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 15px; cursor: pointer; transition: background 0.2s;
@@ -73,19 +105,16 @@
         .notice-header:hover { background-color: #f8fbff; }
         
         .notice-info { display: flex; gap: 15px; align-items: center; flex: 1; }
-        .badge {
-            padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; white-space: nowrap;
-        }
-        .badge.energy { background-color: #e67e22; } /* 주황: 에너지 */
-        .badge.green { background-color: #27ae60; }  /* 초록: 녹색생활 */
-        .badge.system { background-color: #7f8c8d; }  /* 회색: 시스템 */
-        .badge.important { background-color: #e74c3c; } /* 빨강: 중요 */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; white-space: nowrap; }
+        .badge.energy { background-color: #e67e22; }
+        .badge.green { background-color: #27ae60; }
+        .badge.system { background-color: #7f8c8d; }
+        .badge.important { background-color: #e74c3c; }
 
         .notice-title { font-weight: 600; font-size: 1.05rem; line-height: 1.4; }
         .notice-date { font-size: 0.9rem; color: #999; white-space: nowrap; margin-left: 10px; }
         .toggle-icon { font-size: 1.2rem; color: #999; transition: transform 0.3s; margin-left: 15px; }
 
-        /* 내용(답변) 부분 - 평소엔 숨김 */
         .notice-content {
             display: none; padding: 25px; background-color: #f9fafb; 
             border-top: 1px solid #eee; color: #444; line-height: 1.6; font-size: 0.95rem;
@@ -93,45 +122,26 @@
         .notice-content p { margin-bottom: 10px; }
         .notice-content a { color: var(--main-blue); text-decoration: underline; }
 
-        /* 활성화 클래스 */
         .notice-item.active .notice-content { display: block; }
         .notice-item.active .toggle-icon { transform: rotate(180deg); }
         .notice-item.active .notice-title { color: var(--main-blue); }
 
-        /* --- 푸터 --- */
         footer { background:#1d3557; color:white; text-align:center; padding:50px 20px; margin-top: auto; }
-
-        /* --- 모바일 반응형 --- */
-        @media (max-width: 768px) {
-            header { padding: 15px 20px; }
-            .hamburger { display: block; }
-            .nav-links {
-                position: fixed; top: 0; right: -100%; height: 100vh; width: 250px;
-                background-color: white; flex-direction: column; align-items: flex-start;
-                padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-                transition: right 0.3s ease-in-out; z-index: 1001;
-            }
-            .nav-links.active { right: 0; }
-            
-            .notice-container { padding: 20px; width: 95%; }
-            .notice-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .notice-date { margin-left: 0; font-size: 0.8rem; margin-top: 5px; }
-            .toggle-icon { position: absolute; right: 20px; top: 25px; }
-            .notice-item { position: relative; }
-        }
     </style>
 </head>
 <body>
 
     <header>
         <a href="Index.html" class="logo">FindMyRide</a>
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        
         <ul class="nav-links" id="nav-links">
             <li><a href="Index.html">홈</a></li>
             <li><a href="test2.html">대여소 찾기</a></li>
-            <li><a href="MyPage.html">마이페이지</a></li>
+            <li><a href="test3_mypage.html">마이페이지</a></li>
             <li><a href="Notice.html" class="active">공지사항</a></li>
         </ul>
+
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
     </header>
 
     <div class="notice-container">
@@ -257,23 +267,10 @@
     </footer>
 
     <script>
-        // 1. 아코디언 토글 함수 (게시글 클릭 시 펼치기/접기)
         function toggleNotice(element) {
-            // 클릭한 항목에 active 클래스 토글
             element.classList.toggle('active');
-            
-            // (선택사항) 다른 항목은 자동으로 접고 싶다면 아래 주석 해제
-            /*
-            const items = document.querySelectorAll('.notice-item');
-            items.forEach(item => {
-                if (item !== element) {
-                    item.classList.remove('active');
-                }
-            });
-            */
         }
 
-        // 2. 햄버거 메뉴 토글 (모바일용)
         function toggleMenu() {
             const nav = document.getElementById('nav-links');
             const btn = document.querySelector('.hamburger');
