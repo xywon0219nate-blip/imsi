@@ -18,24 +18,65 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     body { background-color: var(--bg-color); color: var(--dark-blue); }
 
-    /* 헤더 (다른 페이지와 동일) */
+    /* --- [헤더 스타일 통일] --- */
     header {
-      width: 100%; background: #fff; padding: 15px 30px;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+      width: 100%;
+      background: #fff;
+      display: flex;
+      align-items: center; /* 수직 중앙 */
+      justify-content: space-between; /* 양끝 정렬 */
+      padding: 15px 30px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      position: sticky; top: 0; z-index: 1000;
     }
-    .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; z-index: 1002; margin-right: auto; }
-    .nav-links { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }
-    .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 16px; }
-    .hamburger { display: none; cursor: pointer; font-size: 24px; background: none; border: none; padding: 5px; }
 
+    .logo { 
+        font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); 
+        text-decoration: none; z-index: 1002; margin-right: auto; 
+    }
+
+    /* 메뉴 리스트 (중앙 배치 & 호버 효과) */
+    .nav-links { 
+        display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; 
+        position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-links a { 
+        text-decoration: none; color: var(--dark-blue); 
+        font-weight: 600; font-size: 16px; 
+        transition: color 0.2s; /* 부드러운 색상 변경 */
+    }
+    .nav-links a:hover { color: var(--main-blue); } /* 마우스 올렸을 때 색상 */
+    .nav-links a.active { color: var(--main-blue); } /* 현재 페이지 표시 */
+
+    /* 햄버거 메뉴 (모바일용) */
+    .hamburger { 
+        display: none; cursor: pointer; font-size: 24px; 
+        color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; 
+    }
+
+    /* 모바일 반응형 헤더 */
     @media (max-width: 768px) {
-        header { padding: 15px 15px; }
-        .nav-links { display: none; } /* 모바일 간소화 */
+        header { padding: 15px 20px; }
+        
+        .nav-links { 
+            position: fixed; top: 0; right: -100%; left: auto; transform: none;
+            height: 100vh; width: 250px; background-color: white; 
+            flex-direction: column; align-items: flex-start;
+            padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s ease-in-out; z-index: 1001;
+        }
+        .nav-links.active { right: 0; }
+        
         .hamburger { display: block; margin-left: auto; }
+        
+        /* 마이페이지 컨테이너 반응형 */
+        .mypage-container { width: 95%; padding: 40px 20px; }
+        .profile-card { flex-direction: column; text-align: center; }
+        .dashboard-grid { grid-template-columns: 1fr; }
+        .favorites-list { grid-template-columns: 1fr; }
     }
 
-    /* 마이페이지 컨테이너 */
+    /* --- 마이페이지 컨텐츠 스타일 --- */
     .mypage-container {
       max-width: 800px; margin: 40px auto; width: 95%;
       display: flex; flex-direction: column; gap: 30px;
@@ -48,9 +89,7 @@
       display: flex; align-items: center; gap: 30px;
       position: relative;
     }
-    .profile-img-wrapper {
-        position: relative; width: 100px; height: 100px;
-    }
+    .profile-img-wrapper { position: relative; width: 100px; height: 100px; }
     .profile-img {
       width: 100%; height: 100%; border-radius: 50%;
       background-color: var(--light-blue); object-fit: cover;
@@ -65,16 +104,13 @@
         font-size: 14px; cursor: pointer; border: 2px solid white;
     }
     .profile-info h2 { font-size: 24px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-    .level-badge {
-        font-size: 12px; background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-weight: bold;
-    }
+    .level-badge { font-size: 12px; background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-weight: bold; }
     .profile-info p { font-size: 14px; color: var(--text-gray); }
     #file-input { display: none; }
 
-    /* 2. 대시보드 (통계) */
-    .dashboard-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-    }
+    /* 2. 대시보드 */
+    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .stat-card {
       background: var(--card-bg); padding: 25px; border-radius: 16px;
       text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
@@ -87,10 +123,7 @@
     .stat-unit { font-size: 14px; font-weight: normal; color: var(--text-gray); }
 
     /* 3. 즐겨찾기 목록 */
-    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-    .favorites-list {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;
-    }
+    .favorites-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
     .fav-item {
       background: var(--card-bg); padding: 20px; border-radius: 12px;
       display: flex; justify-content: space-between; align-items: center;
@@ -111,25 +144,21 @@
     }
 
     footer { background: var(--dark-blue); color: white; text-align: center; padding: 50px 20px; margin-top: 80px; }
-    
-    @media (max-width: 768px) {
-        .profile-card { flex-direction: column; text-align: center; }
-        .dashboard-grid { grid-template-columns: 1fr; }
-        .favorites-list { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 
 <body>
   <header>
     <a href="Index.html" class="logo">FindMyRide</a>
-    <ul class="nav-links">
+    
+    <ul class="nav-links" id="nav-links">
       <li><a href="Index.html">홈</a></li>
       <li><a href="test2.html">대여소 찾기</a></li>
-      <li><a href="MyPage.html" style="color:var(--main-blue);">마이페이지</a></li>
+      <li><a href="test3_mypage.html" class="active">마이페이지</a></li>
       <li><a href="Notice.html">공지사항</a></li>
     </ul>
-    <button class="hamburger">☰</button>
+
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
   </header>
 
   <div class="mypage-container">
@@ -171,11 +200,11 @@
     </div>
 
     <div class="favorites">
-      <div class="section-title">
+      <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
           자주 가는 대여소
           <button onclick="location.href='test2.html'" style="font-size:13px; padding:5px 10px; border:1px solid #ddd; background:white; border-radius:5px; cursor:pointer;">+ 추가하기</button>
       </div>
-      <div class="fav-list" id="favList">
+      <div class="favorites-list" id="favList">
         <div class="empty-msg">불러오는 중...</div>
       </div>
     </div>
@@ -190,7 +219,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // ==========================================
     // [필수] 여기에 본인의 진짜 키를 넣으세요!
@@ -203,13 +232,21 @@
             messagingSenderId: "522941456140",
             appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
         };
-    
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     const SEOUL_API_KEY = '55554254706e757238356a6d44556d';
     const FAV_STORAGE_KEY = 'findmyride_favorites';
+
+    // 햄버거 메뉴 토글 함수 (전역 등록)
+    window.toggleMenu = function() {
+        const nav = document.getElementById('nav-links');
+        const btn = document.querySelector('.hamburger');
+        nav.classList.toggle('active');
+        btn.innerHTML = nav.classList.contains('active') ? "✕" : "☰";
+    }
 
     // 1. 로그인 상태 확인 및 데이터 로드
     onAuthStateChanged(auth, async (user) => {
@@ -238,8 +275,7 @@
                 else if(score < 500) { badge.innerText = "🌿 Lv.2 묘목"; badge.style.background="#dbeafe"; badge.style.color="#1e40af"; }
                 else { badge.innerText = "🌳 Lv.3 나무"; badge.style.background="#fef3c7"; badge.style.color="#92400e"; }
 
-                // 자전거 누적 거리 (없으면 0) - *만약 DB에 따로 저장 안 했으면 로컬스토리지 임시 사용 가능하지만, 여기선 DB에 totalKm 필드가 있다고 가정*
-                // (Index.html의 주행 인증에서 DB에 totalKm도 업데이트하도록 추후 수정 권장)
+                // 자전거 누적 거리
                 document.getElementById('bike-dist').innerText = (data.totalKm || 0).toFixed(1);
             }
 
@@ -261,14 +297,12 @@
         }
     });
 
-    // 2. 프로필 사진 변경 (미리보기 + 로컬스토리지 저장 - *DB 저장은 별도 구현 필요*)
+    // 2. 프로필 사진 변경 (미리보기)
     window.changeProfile = function(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('profile-pic').src = e.target.result;
-                // 실제 서비스에선 여기서 Firebase Storage에 업로드해야 함
-                // 지금은 시연용으로 화면만 바꿈
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -312,7 +346,7 @@
         }
     }
 
-    // 4. 즐겨찾기 삭제 (전역 함수로 등록)
+    // 4. 즐겨찾기 삭제 (전역 함수)
     window.removeFav = function(stationId, btn) {
         if (!confirm('삭제하시겠습니까?')) return;
         
