@@ -411,7 +411,10 @@
             showFloatingText(`+${points}g`);
             window.pokeTree();
             const docRef = doc(db, "users", myUid);
-            await updateDoc(docRef, { totalScore: increment(points) });
+           await updateDoc(docRef, { 
+                totalScore: increment(points),
+                totalKm: increment(km) // [추가] 거리도 누적 저장!
+            });
         }
 
         function checkPendingMissions() {
