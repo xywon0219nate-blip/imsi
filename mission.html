@@ -101,70 +101,85 @@
     </footer>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type');
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
 
-        const content = {
-            'tumbler': { icon: '🥤', title: '텀블러 인증', desc: '카페에서 텀블러를 사용하는 모습을<br>사진으로 찍어주세요!', point: 50 },
-            'bus': { icon: '🚌', title: '대중교통 인증', desc: '버스/지하철 단말기나 하차 모습을<br>사진으로 남겨주세요.', point: 200 },
-            'food': { icon: '🥡', title: '용기내 챌린지', desc: '다회용기에 음식을 포장한<br>용기 인증샷을 남겨주세요.', point: 300 },
-            'mail': { icon: '📧', title: '메일함 비우기', desc: '스팸메일을 삭제한 화면을<br>캡쳐해서 올려주세요.', point: 10 }
-        };
-
-        const data = content[type] || content['tumbler'];
-        document.getElementById('mission-icon').innerText = data.icon;
-        document.getElementById('mission-title').innerText = data.title;
-        document.getElementById('mission-desc').innerHTML = data.desc;
-
-        // [중요] 이미지 데이터를 임시 저장할 변수
-        let imageDataString = null;
-
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    // 읽어온 이미지 데이터를 변수에 저장
-                    imageDataString = e.target.result;
-
-                    document.getElementById('preview-img').src = imageDataString;
-                    document.getElementById('preview-img').style.display = 'block';
-                    document.getElementById('preview-placeholder').style.display = 'none';
-                    
-                    const btn = document.getElementById('submit-btn');
-                    btn.disabled = false;
-                    btn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--main-blue');
-                    btn.style.cursor = 'pointer';
-                    btn.innerText = "관리자에게 심사 요청";
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
+    // [변경] 새로운 미션 데이터 반영
+    const content = {
+        'tumbler': { 
+            icon: '🥤', title: '텀블러 인증', 
+            desc: '카페에서 텀블러를 사용하는 모습을<br>사진으로 찍어주세요!', 
+            point: 300 
+        },
+        'refill': { 
+            icon: '🧴', title: '리필스테이션 이용', 
+            desc: '샴푸, 세제 등을 리필하는 모습을<br>사진으로 인증해주세요.', 
+            point: 500 
+        },
+        'receipt': { 
+            icon: '🧾', title: '전자영수증 발급', 
+            desc: '종이영수증 대신 전자영수증을<br>발급받은 내역을 캡쳐해주세요.', 
+            point: 100 
         }
+        // 메일함 등은 삭제하거나 유지 가능
+    };
 
-        function submitReview() {
-            let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
-            
-            const newRequest = {
-                id: Date.now(),
-                type: type,
-                name: data.title,
-                point: data.point,
-                status: 'pending',
-                date: new Date().toLocaleDateString(),
-                // [중요] 이미지 데이터도 함께 저장
-                image: imageDataString 
+    const data = content[type] || content['tumbler'];
+    document.getElementById('mission-icon').innerText = data.icon;
+    document.getElementById('mission-title').innerText = data.title;
+    document.getElementById('mission-desc').innerHTML = data.desc;
+
+    let imageDataString = null;
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                imageDataString = e.target.result;
+                document.getElementById('preview-img').src = imageDataString;
+                document.getElementById('preview-img').style.display = 'block';
+                document.getElementById('preview-placeholder').style.display = 'none';
+                
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = false;
+                btn.style.backgroundColor = '#457b9d';
+                btn.style.cursor = 'pointer';
+                btn.innerText = "관리자에게 심사 요청";
             };
-            
-            // 용량 초과 에러 방지를 위한 try-catch
-            try {
-                reviewList.push(newRequest);
-                localStorage.setItem('reviewList', JSON.stringify(reviewList));
-                alert("✅ 심사 요청 완료!\n관리자 승인 후 포인트가 지급됩니다.");
-                location.href = 'Index.html';
-            } catch (e) {
-                alert("⚠️ 이미지 용량이 너무 큽니다!\n데모 버전에서는 저용량 이미지나 캡처 화면을 사용해주세요.");
-                console.error("Storage failed:", e);
-            }
+            reader.readAsDataURL(input.files[0]);
         }
-    </script>
+    }
+
+    function submitReview() {
+        let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
+        
+        const newRequest = {
+            id: Date.now(),
+            type: type,
+            name: data.title,
+            point: data.point,
+            status: 'pending',
+            date: new Date().toLocaleDateString(),
+            image: imageDataString 
+        };
+        
+        try {
+            reviewList.push(newRequest);
+            localStorage.setItem('reviewList', JSON.stringify(reviewList));
+
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = "제출 완료! ✓";
+            btn.style.backgroundColor = "#2ecc71";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                location.href = 'Index.html';
+            }, 800);
+
+        } catch (e) {
+            alert("⚠️ 이미지 용량이 너무 큽니다! 저용량 이미지를 사용해주세요.");
+        }
+    }
+</script>
 </body>
 </html>
