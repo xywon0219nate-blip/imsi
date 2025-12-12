@@ -23,7 +23,6 @@
 
         .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
 
-        /* 원형 게이지 */
         .circle-container {
             position: relative; width: 250px; height: 250px; margin-bottom: 30px;
         }
@@ -32,7 +31,6 @@
             border: 15px solid #e2e8f0;
             transition: border-color 0.3s;
         }
-        
         /* 보상 가능할 때 초록색 */
         .circle-bg.active { border-color: #22c55e; }
 
@@ -54,7 +52,6 @@
         .start-btn { background: var(--main-blue); color: white; }
         .start-btn:hover { background: #35607a; transform: scale(1.05); }
 
-        /* 보상 받기 버튼 */
         .finish-btn { 
             background: #22c55e; color: white; display: none; 
             animation: pulse 2s infinite;
@@ -101,40 +98,39 @@
 
     <script>
         let totalSteps = 0;
+        let redeemedSteps = 0; // [NEW] 이미 보상받은 걸음 수
         let isRunning = false;
 
-        // [중요] 오늘 날짜 키 생성 (예: "2025. 5. 20.")
-        // 이 값이 바뀌면(다음날이 되면) 걸음 수를 0으로 초기화함
         const TODAY_KEY = new Date().toLocaleDateString();
 
-        // 센서 관련 변수
+        // 센서 변수
         let lastStepTime = 0;
         let lastMagnitude = 0;
         const MIN_STEP_DELAY = 400; 
         const THRESHOLD = 2.0;      
 
         // 보상 설정
-        const STEPS_PER_UNIT = 1000; // 1000걸음 단위
-        const POINTS_PER_UNIT = 50;  // 50포인트
+        const STEPS_PER_UNIT = 1000;
+        const POINTS_PER_UNIT = 50;
 
-        // [1] 페이지 로드 시 저장된 걸음 수 불러오기
         window.onload = function() {
             const savedDate = localStorage.getItem('pedometerDate');
             const savedSteps = localStorage.getItem('pedometerSteps');
+            const savedRedeemed = localStorage.getItem('redeemedSteps'); // [NEW]
 
-            if (savedDate === TODAY_KEY && savedSteps) {
-                // 오늘 날짜와 저장된 날짜가 같으면 -> 이어서 하기
-                totalSteps = parseInt(savedSteps);
+            if (savedDate === TODAY_KEY) {
+                // 같은 날짜면 데이터 복구
+                if (savedSteps) totalSteps = parseInt(savedSteps);
+                if (savedRedeemed) redeemedSteps = parseInt(savedRedeemed);
             } else {
-                // 날짜가 다르면(새로운 하루) -> 0으로 초기화
+                // 날짜 바뀌면 초기화
                 totalSteps = 0;
+                redeemedSteps = 0;
                 localStorage.setItem('pedometerDate', TODAY_KEY);
                 localStorage.setItem('pedometerSteps', 0);
-                // 이미 받은 보상 기록도 초기화하고 싶다면 아래 주석 해제
-                // localStorage.removeItem('lastClaimedSteps');
+                localStorage.setItem('redeemedSteps', 0);
             }
 
-            // 화면 갱신
             updateDisplay();
         };
 
@@ -158,13 +154,11 @@
             isRunning = true;
             document.getElementById('start-btn').style.display = 'none';
             document.getElementById('status-msg').innerHTML = "측정 중...🏃<br>화면을 켜두고 걸어주세요.";
-            
             window.addEventListener('devicemotion', handleMotion);
         }
 
         function handleMotion(event) {
             if (!isRunning) return;
-
             const acc = event.accelerationIncludingGravity;
             if (!acc) return;
 
@@ -176,35 +170,33 @@
                 incrementStep(1); 
                 lastStepTime = currentTime;
             }
-
             lastMagnitude = magnitude;
         }
 
-        // 걸음 수 증가 함수
         function incrementStep(amount) {
             totalSteps += amount;
-            
-            // [중요] 걸을 때마다 저장하기
+            // 저장
             localStorage.setItem('pedometerSteps', totalSteps);
             localStorage.setItem('pedometerDate', TODAY_KEY);
-
             updateDisplay();
         }
 
-        // 화면 및 보상 상태 업데이트 함수 (분리됨)
+        // [핵심] 화면 및 버튼 상태 업데이트
         function updateDisplay() {
             document.getElementById('step-display').innerText = totalSteps.toLocaleString();
             
-            let remainder = totalSteps % STEPS_PER_UNIT;
-            let stepsLeft = STEPS_PER_UNIT - remainder;
+            // 아직 보상받지 않은 걸음 수 계산 (총 걸음 - 이미 받은 걸음)
+            let availableSteps = totalSteps - redeemedSteps;
             
-            // 이미 보상받은 걸음 수 체크 (중복 수령 방지용 로직이 필요하다면 추가 구현 가능)
-            // 여기서는 심플하게 현재 걸음 수 기준으로 계산합니다.
-            
-            let claimableUnits = Math.floor(totalSteps / STEPS_PER_UNIT);
+            // 받을 수 있는 보상 단위 (예: 2500보 걸었고 1000보 보상 받았으면 -> 남은 1500보로 1단위 더 가능)
+            let claimableUnits = Math.floor(availableSteps / STEPS_PER_UNIT);
             let claimablePoints = claimableUnits * POINTS_PER_UNIT;
 
-            // 보상 조건: 1000걸음 이상일 때
+            // 다음 목표까지 남은 걸음 (단순 보여주기용)
+            let remainder = totalSteps % STEPS_PER_UNIT;
+            let stepsLeft = STEPS_PER_UNIT - remainder;
+
+            // 보상 조건: 받을 수 있는 단위가 1개 이상일 때
             if (claimableUnits > 0) {
                 document.getElementById('next-goal-text').innerText = "보상 수령 가능!";
                 document.getElementById('next-goal-text').style.color = "#22c55e";
@@ -213,10 +205,10 @@
                 
                 const btn = document.getElementById('finish-btn');
                 btn.style.display = 'block';
-                btn.innerText = `🎁 ${claimablePoints}g 받기 (누적 ${totalSteps}보)`;
+                btn.innerText = `🎁 ${claimablePoints}g 받기 (미수령 ${claimableUnits * 1000}보)`;
                 
                 if(isRunning) {
-                    document.getElementById('status-msg').innerHTML = `축하합니다! <strong>${claimableUnits * 1000}걸음</strong> 돌파!`;
+                    document.getElementById('status-msg').innerHTML = `축하합니다! 보상을 받아주세요!`;
                 }
             } else {
                 document.getElementById('next-goal-text').innerText = `다음 보상까지 ${stepsLeft}`;
@@ -227,19 +219,24 @@
         }
 
         function finishWalking() {
-            let claimableUnits = Math.floor(totalSteps / STEPS_PER_UNIT);
+            // 다시 한번 계산
+            let availableSteps = totalSteps - redeemedSteps;
+            let claimableUnits = Math.floor(availableSteps / STEPS_PER_UNIT);
             let points = claimableUnits * POINTS_PER_UNIT;
 
             if (points > 0) {
+                // [NEW] 보상 처리 후 '이미 받은 걸음 수' 업데이트
+                redeemedSteps += (claimableUnits * STEPS_PER_UNIT);
+                localStorage.setItem('redeemedSteps', redeemedSteps);
+
+                // Index.html로 보상 정보 전달
                 localStorage.setItem('walkingSuccess', 'true');
                 localStorage.setItem('walkingPoints', points);
                 
-                // 보상 받고 나면 걸음 수를 초기화할지, 유지할지 결정해야 합니다.
-                // 여기서는 '오늘의 누적 걸음' 컨셉이므로 걸음 수는 유지하되,
-                // Index.html에서 중복 지급을 막는 로직이 필요할 수 있습니다.
-                // (현재 로직은 받을 때마다 계속 줍니다. 시연용으로는 이게 더 좋을 수 있습니다!)
+                alert(`수고하셨습니다!\n${claimableUnits * 1000}걸음에 대한 ${points}g을 획득했습니다.`);
                 
-                alert(`수고하셨습니다!\n오늘 총 ${totalSteps}걸음을 걸어\n${points}g을 획득했습니다.`);
+                // 페이지 이동하지 않고 여기서 UI만 갱신해도 되지만, 
+                // 점수 적립을 위해 메인으로 이동하는 것이 확실합니다.
                 location.href = 'Index.html';
             }
         }
