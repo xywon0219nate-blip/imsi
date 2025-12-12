@@ -32,26 +32,29 @@
             border: 15px solid #e2e8f0;
             transition: border-color 0.3s;
         }
-        /* 목표 달성 시 테두리 색 변경용 클래스 */
+        
+        /* 1000걸음 달성 가능할 때 초록색으로 바뀜 */
         .circle-bg.active { border-color: #22c55e; }
 
         .step-count-box {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
         }
-        .step-number { font-size: 60px; font-weight: 800; color: var(--main-blue); line-height: 1; }
-        .step-label { font-size: 16px; color: #64748b; margin-top: 5px; }
+        .step-number { font-size: 50px; font-weight: 800; color: var(--main-blue); line-height: 1; }
+        .step-label { font-size: 14px; color: #64748b; margin-top: 5px; }
+        .next-goal { font-size: 12px; color: #999; margin-top: 5px; }
 
         .info-text { font-size: 1.1rem; color: #475569; margin-bottom: 40px; line-height: 1.5; }
 
         button {
             padding: 18px 40px; border-radius: 50px; font-size: 18px; font-weight: bold;
-            border: none; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 300px;
+            border: none; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 350px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .start-btn { background: var(--main-blue); color: white; }
         .start-btn:hover { background: #35607a; transform: scale(1.05); }
 
+        /* 보상 받기 버튼 */
         .finish-btn { 
             background: #22c55e; color: white; display: none; 
             animation: pulse 2s infinite;
@@ -64,7 +67,7 @@
 
         .dev-btn {
             margin-top: 20px; background: none; border: none; 
-            color: #ccc; font-size: 12px; box-shadow: none; text-decoration: underline;
+            color: #ccc; font-size: 12px; box-shadow: none; text-decoration: underline; cursor: pointer;
         }
     </style>
 </head>
@@ -81,36 +84,34 @@
             <div class="step-count-box">
                 <div class="step-number" id="step-display">0</div>
                 <div class="step-label">걸음</div>
+                <div class="next-goal" id="next-goal-text">다음 보상까지 1000</div>
             </div>
         </div>
 
         <p class="info-text" id="status-msg">
-            '시작하기'를 누르고<br>
-            스마트폰을 들고 <strong>힘차게</strong> 걸어보세요!
+            1,000걸음마다 50g 적립!<br>
+            '시작하기'를 누르고 걸어보세요.
         </p>
 
         <button class="start-btn" id="start-btn" onclick="requestPermission()">시작하기</button>
-        <button class="finish-btn" id="finish-btn" onclick="finishWalking()">10g 받기 (완료)</button>
+        <button class="finish-btn" id="finish-btn" onclick="finishWalking()">포인트 받기</button>
 
-        <button class="dev-btn" onclick="incrementStep()">[Dev] 강제 걸음 추가</button>
+        <button class="dev-btn" onclick="incrementStep(100)">[Dev] 테스트용 +100걸음</button>
     </div>
 
     <script>
-        let stepCount = 0;
-        const goalSteps = 30; 
+        let totalSteps = 0;
         let isRunning = false;
 
-        // [개선된 알고리즘 변수]
-        let lastStepTime = 0; // 마지막 걸음이 인식된 시간
+        // 센서 감도 설정 (값이 클수록 세게 흔들어야 함)
+        let lastStepTime = 0;
         let lastMagnitude = 0;
-        
-        // 1. 최소 시간 간격 (ms): 이 시간 안에는 두 번 카운트하지 않음 (사람의 빠른 걸음 기준)
-        const MIN_STEP_DELAY = 400; 
-        
-        // 2. 민감도 설정: 이 값보다 큰 충격이 와야 걸음으로 인정
-        // 값이 클수록 세게 걸어야 함 (너무 낮으면 손떨림도 인식됨)
-        // 보통 걷기 가속도는 1.2G ~ 1.5G 정도 나옵니다.
-        const THRESHOLD = 2.7; 
+        const MIN_STEP_DELAY = 400; // 0.4초 간격 제한
+        const THRESHOLD = 2.0;      // 감도 (적당함)
+
+        // 보상 설정
+        const STEPS_PER_UNIT = 1000; // 1000걸음 단위
+        const POINTS_PER_UNIT = 50;  // 50포인트
 
         function requestPermission() {
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -131,7 +132,7 @@
         function startPedometer() {
             isRunning = true;
             document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('status-msg').innerHTML = "측정 중...🏃<br>규칙적으로 걸어보세요.";
+            document.getElementById('status-msg').innerHTML = "측정 중...🏃<br>화면을 켜두고 걸어주세요.";
             
             window.addEventListener('devicemotion', handleMotion);
         }
@@ -142,57 +143,75 @@
             const acc = event.accelerationIncludingGravity;
             if (!acc) return;
 
-            // X, Y, Z 벡터의 전체 크기(Magnitude) 계산
-            // 이렇게 하면 폰을 주머니에 넣든 손에 들든 상관없이 '흔들림의 총량'을 알 수 있습니다.
             const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
-
-            // 현재 시간
             const currentTime = new Date().getTime();
-
-            // [알고리즘 핵심]
-            // 1. 변화량 계산: 지금 흔들림 - 직전 흔들림
             const delta = Math.abs(magnitude - lastMagnitude);
 
-            // 2. 조건 체크
-            // 조건 A: 변화량이 임계값(THRESHOLD)보다 커야 함 (충격 감지)
-            // 조건 B: 마지막 걸음 이후 일정 시간(MIN_STEP_DELAY)이 지나야 함 (중복 방지)
             if (delta > THRESHOLD && (currentTime - lastStepTime > MIN_STEP_DELAY)) {
-                incrementStep();
-                lastStepTime = currentTime; // 마지막 걸음 시간 갱신
+                incrementStep(1); // 1걸음 증가
+                lastStepTime = currentTime;
             }
 
-            lastMagnitude = magnitude; // 현재 값을 저장해서 다음 비교에 사용
+            lastMagnitude = magnitude;
         }
 
-        function incrementStep() {
-            stepCount++;
-            document.getElementById('step-display').innerText = stepCount;
+        // 걸음 수 증가 함수 (amount만큼 증가)
+        function incrementStep(amount) {
+            totalSteps += amount;
+            
+            // 화면 업데이트
+            document.getElementById('step-display').innerText = totalSteps.toLocaleString();
+            
+            // 다음 보상까지 남은 걸음 계산
+            let remainder = totalSteps % STEPS_PER_UNIT;
+            let stepsLeft = STEPS_PER_UNIT - remainder;
+            
+            // 만약 딱 1000, 2000... 이면 남은 걸음은 0이 아니라 1000으로 표시하고 싶다면 로직 조정 가능하나,
+            // 여기서는 1000이 차면 '보상 가능' 상태가 되므로 0으로 둠.
+            
+            // 보상 가능한 총 포인트 계산 (예: 2500걸음 -> 2000걸음치인 100포인트)
+            let claimableUnits = Math.floor(totalSteps / STEPS_PER_UNIT);
+            let claimablePoints = claimableUnits * POINTS_PER_UNIT;
 
-            // 시각적 효과: 걸을 때마다 살짝 커지는 애니메이션
-            const num = document.getElementById('step-display');
-            num.style.transform = "scale(1.2)";
-            setTimeout(() => num.style.transform = "scale(1)", 100);
-
-            if (stepCount >= goalSteps) {
-                document.getElementById('status-msg').innerHTML = "🎉 목표 달성!<br>포인트를 받아주세요.";
-                document.getElementById('status-msg').style.color = "#22c55e";
-                document.getElementById('status-msg').style.fontWeight = "bold";
+            if (claimableUnits > 0) {
+                // 보상 받을 수 있음
+                document.getElementById('next-goal-text').innerText = "보상 수령 가능!";
+                document.getElementById('next-goal-text').style.color = "#22c55e";
+                document.getElementById('next-goal-text').style.fontWeight = "bold";
                 
                 document.getElementById('circle-border').classList.add('active');
                 
-                const finishBtn = document.getElementById('finish-btn');
-                finishBtn.style.display = 'block';
+                const btn = document.getElementById('finish-btn');
+                btn.style.display = 'block';
+                btn.innerText = `🎁 ${claimablePoints}g 받기 (현재 ${totalSteps}걸음)`;
                 
-                window.removeEventListener('devicemotion', handleMotion);
-                isRunning = false;
+                document.getElementById('status-msg').innerHTML = `축하합니다! <strong>${claimableUnits * 1000}걸음</strong> 돌파!<br>버튼을 눌러 포인트를 받으세요.`;
+            } else {
+                // 아직 1000걸음 안 됨
+                document.getElementById('next-goal-text').innerText = `다음 보상까지 ${stepsLeft}`;
+                document.getElementById('next-goal-text').style.color = "#999";
+                document.getElementById('circle-border').classList.remove('active');
+                document.getElementById('finish-btn').style.display = 'none';
+                
+                if(isRunning) {
+                    document.getElementById('status-msg').innerHTML = "측정 중...🏃<br>힘차게 걸어보세요!";
+                }
             }
         }
 
         function finishWalking() {
-            localStorage.setItem('walkingSuccess', 'true');
-            localStorage.setItem('walkingPoints', '10');
-            alert("수고하셨습니다! 건강한 지구를 위한 한 걸음이었습니다.");
-            location.href = 'Index.html';
+            // 받을 포인트 계산
+            let claimableUnits = Math.floor(totalSteps / STEPS_PER_UNIT);
+            let points = claimableUnits * POINTS_PER_UNIT;
+
+            if (points > 0) {
+                // Index.html로 전달
+                localStorage.setItem('walkingSuccess', 'true');
+                localStorage.setItem('walkingPoints', points);
+                
+                alert(`수고하셨습니다!\n총 ${totalSteps}걸음을 걸어\n${points}g을 획득했습니다.`);
+                location.href = 'Index.html';
+            }
         }
     </script>
 </body>
