@@ -22,13 +22,12 @@
             display: flex; flex-direction: column; min-height: 100vh; 
         }
 
-        /* --- 헤더 스타일 --- */
+        /* --- 헤더 스타일 (수정됨) --- */
         header {
             width: 100%;
             background: #fff;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            align-items: center; /* 수직 중앙 정렬 */
             padding: 15px 30px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             position: sticky;
@@ -36,37 +35,63 @@
             z-index: 1000;
         }
 
-        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; z-index: 1002; }
-
-        /* 로그인 관련 버튼 스타일 */
-        .auth-container { display: flex; align-items: center; gap: 10px; z-index: 1002; }
-        #login-btn { 
-            background: #4285F4; color: white; border: none; padding: 8px 16px; 
-            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
-        }
-        #user-profile { display: none; align-items: center; gap: 10px; font-size: 14px; }
-        #logout-btn { 
-            background: #eee; color: #555; border: none; padding: 5px 10px; 
-            border-radius: 4px; cursor: pointer; font-size: 12px; 
+        /* 로고: 왼쪽 고정 */
+        .logo { 
+            font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); 
+            text-decoration: none; z-index: 1002; margin-right: auto; /* 오른쪽 여백을 다 차지해서 나머지 요소를 밀어냄 */
         }
 
-        /* 햄버거 메뉴 */
-        .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; }
-        .nav-links { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; }
+        /* 메뉴 리스트: 중앙 배치 */
+        .nav-links { 
+            display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; 
+            position: absolute; left: 50%; transform: translateX(-50%); /* 화면 정중앙 */
+        }
         .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 16px; transition: color 0.2s; }
         .nav-links a:hover { color: var(--main-blue); }
 
+        /* 로그인 컨테이너: 오른쪽 끝 */
+        .auth-container { 
+            display: flex; align-items: center; gap: 10px; z-index: 1002; 
+        }
+
+        /* 로그인 버튼 디자인 (수정됨) */
+        #login-btn { 
+            background: var(--dark-blue); /* 구글 파란색 대신 앱 테마색 */
+            color: white; border: none; padding: 8px 20px; 
+            border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: background 0.2s;
+        }
+        #login-btn:hover { background: var(--main-blue); }
+
+        #user-profile { display: none; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; }
+        #logout-btn { 
+            background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 5px 12px; 
+            border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;
+        }
+        #logout-btn:hover { background: #e2e8f0; }
+
+        /* 햄버거 메뉴 */
+        .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; }
+
+        /* 모바일 반응형 */
         @media (max-width: 768px) {
             header { padding: 15px 20px; }
-            .auth-container { margin-right: 40px; /* 햄버거 버튼 자리 확보 */ }
-            .hamburger { display: block; position: absolute; right: 20px; }
+            
+            /* 모바일에서 메뉴는 숨김 */
             .nav-links {
-                position: fixed; top: 0; right: -100%; height: 100vh; width: 250px;
+                position: fixed; top: 0; right: -100%; left: auto; transform: none; /* 중앙 정렬 해제 */
+                height: 100vh; width: 250px;
                 background-color: white; flex-direction: column; align-items: flex-start;
                 padding: 80px 30px; gap: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
                 transition: right 0.3s ease-in-out; z-index: 1001;
             }
             .nav-links.active { right: 0; }
+            
+            /* 햄버거 버튼 보이기 */
+            .hamburger { display: block; margin-left: 15px; }
+            
+            /* 모바일에서 로고-로그인-햄버거 순서 */
+            .auth-container { margin-left: auto; margin-right: 0; }
         }
 
         /* 대시보드 */
@@ -106,22 +131,22 @@
     <header>
         <a href="Index.html" class="logo">FindMyRide</a>
         
-        <div class="auth-container">
-            <button id="login-btn">G 로그인</button>
-            <div id="user-profile">
-                <span id="user-name"></span>
-                <button id="logout-btn">로그아웃</button>
-            </div>
-        </div>
-
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
-    
         <ul class="nav-links" id="nav-links">
             <li><a href="Index.html">홈</a></li>
             <li><a href="test2.html">대여소 찾기</a></li>
             <li><a href="test3_mypage.html">마이페이지</a></li>
             <li><a href="Notice.html">공지사항</a></li>
         </ul>
+
+        <div class="auth-container">
+            <button id="login-btn">로그인</button>
+            <div id="user-profile">
+                <span id="user-name"></span>님 환영합니다!
+                <button id="logout-btn">로그아웃</button>
+            </div>
+        </div>
+
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
     </header>
 
     <div class="dashboard-container">
@@ -198,9 +223,9 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ========================================================
-        // [중요] 아래 firebaseConfig 안에 본인의 키를 붙여넣으세요!
-        // ========================================================
+        // ==========================================
+        // [주의] 여기에 아까 사용한 API 키를 넣어주세요!
+        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
             authDomain: "capstone-a39ed.firebaseapp.com",
@@ -209,9 +234,7 @@
             messagingSenderId: "522941456140",
             appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
         };
-        // ========================================================
 
-        // 파이어베이스 초기화
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -221,7 +244,7 @@
         let myUid = null;
         const maxLevelScore = 1000;
 
-        // 1. 로그인 버튼
+        // 로그인 버튼
         const loginBtn = document.getElementById('login-btn');
         if(loginBtn) {
             loginBtn.addEventListener('click', () => {
@@ -229,7 +252,7 @@
             });
         }
 
-        // 2. 로그아웃 버튼
+        // 로그아웃 버튼
         const logoutBtn = document.getElementById('logout-btn');
         if(logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -240,30 +263,24 @@
             });
         }
 
-        // 3. 로그인 상태 감지 (핵심 로직)
+        // 로그인 상태 감지
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // 로그인 성공
                 myUid = user.uid;
                 document.getElementById('login-btn').style.display = 'none';
                 document.getElementById('user-profile').style.display = 'flex';
                 document.getElementById('user-name').innerText = user.displayName;
 
-                // 파이어베이스에서 점수 불러오기
                 await loadMyData();
-                
-                // 로그인 후에만 미션 결과 체크 (localStorage에 있던 임시 데이터 처리)
                 checkPendingMissions();
             } else {
-                // 로그아웃 상태
                 document.getElementById('login-btn').style.display = 'block';
                 document.getElementById('user-profile').style.display = 'none';
                 document.getElementById('level-name').innerText = "로그인이 필요합니다";
-                updateUI(0); // 점수 0으로 표시
+                updateUI(0);
             }
         });
 
-        // 내 데이터 불러오기
         async function loadMyData() {
             const docRef = doc(db, "users", myUid);
             const docSnap = await getDoc(docRef);
@@ -277,26 +294,18 @@
             updateUI(myScore);
         }
 
-        // 점수 추가 (서버 저장)
         window.addPoints = async function(points) {
-            if (!myUid) return; // 로그인 안했으면 무시 (또는 경고)
-            
-            // 화면 먼저 갱신
+            if (!myUid) return;
             myScore += points;
             updateUI(myScore);
-
-            // 서버 저장
             const docRef = doc(db, "users", myUid);
             await updateDoc(docRef, { totalScore: increment(points) });
         }
 
-        // 미션 완료했는지 체크 (localStorage 확인 -> Firestore 저장)
         function checkPendingMissions() {
-            // 1. 관리자 승인 건
             let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
             let newPoints = 0;
             let approvedCount = 0;
-
             const updatedList = reviewList.map(item => {
                 if (item.status === 'approved' && !item.claimed) {
                     newPoints += item.point;
@@ -305,22 +314,17 @@
                 }
                 return item;
             });
-
             if (approvedCount > 0) {
                 localStorage.setItem('reviewList', JSON.stringify(updatedList));
                 window.addPoints(newPoints);
                 alert(`🎉 관리자 승인 완료! \n${approvedCount}건의 미션으로 ${newPoints}g 획득!`);
             }
-
-            // 2. 자전거 지도
             if (localStorage.getItem('isRiding') === 'true') {
                 if(confirm("🚲 따릉이 지도 확인 완료! 500g을 받으시겠습니까?")) {
                     window.addPoints(500);
                 }
                 localStorage.removeItem('isRiding');
             }
-
-            // 3. 만보기
             if (localStorage.getItem('walkingSuccess') === 'true') {
                 const pts = parseInt(localStorage.getItem('walkingPoints'));
                 window.addPoints(pts);
@@ -330,15 +334,12 @@
             }
         }
 
-        // 화면 그리기
         function updateUI(score) {
             document.getElementById('score').innerText = score;
-            
             let percentage = (score / maxLevelScore) * 100;
             if(percentage > 100) percentage = 100;
             document.getElementById('progress-fill').style.width = percentage + '%';
             document.getElementById('progress-text').innerText = Math.floor(percentage) + '%';
-
             const treeDisplay = document.getElementById('tree-display');
             const levelName = document.getElementById('level-name');
 
@@ -348,7 +349,6 @@
             else { treeDisplay.innerText = "🌲"; levelName.innerText = "Level 4. 울창한 숲의 주인!"; }
         }
 
-        // 전역 함수로 등록 (HTML onclick에서 쓰기 위함)
         window.toggleMenu = function() {
             const nav = document.getElementById('nav-links');
             const btn = document.querySelector('.hamburger');
