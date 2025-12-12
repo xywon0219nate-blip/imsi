@@ -33,7 +33,7 @@
             transition: border-color 0.3s;
         }
         
-        /* 1000걸음 달성 가능할 때 초록색으로 바뀜 */
+        /* 보상 가능할 때 초록색 */
         .circle-bg.active { border-color: #22c55e; }
 
         .step-count-box {
@@ -83,7 +83,7 @@
             <div class="circle-bg" id="circle-border"></div>
             <div class="step-count-box">
                 <div class="step-number" id="step-display">0</div>
-                <div class="step-label">걸음</div>
+                <div class="step-label">오늘의 걸음</div>
                 <div class="next-goal" id="next-goal-text">다음 보상까지 1000</div>
             </div>
         </div>
@@ -93,7 +93,7 @@
             '시작하기'를 누르고 걸어보세요.
         </p>
 
-        <button class="start-btn" id="start-btn" onclick="requestPermission()">시작하기</button>
+        <button class="start-btn" id="start-btn" onclick="requestPermission()">이어하기 / 시작하기</button>
         <button class="finish-btn" id="finish-btn" onclick="finishWalking()">포인트 받기</button>
 
         <button class="dev-btn" onclick="incrementStep(100)">[Dev] 테스트용 +100걸음</button>
@@ -103,15 +103,40 @@
         let totalSteps = 0;
         let isRunning = false;
 
-        // 센서 감도 설정 (값이 클수록 세게 흔들어야 함)
+        // [중요] 오늘 날짜 키 생성 (예: "2025. 5. 20.")
+        // 이 값이 바뀌면(다음날이 되면) 걸음 수를 0으로 초기화함
+        const TODAY_KEY = new Date().toLocaleDateString();
+
+        // 센서 관련 변수
         let lastStepTime = 0;
         let lastMagnitude = 0;
-        const MIN_STEP_DELAY = 400; // 0.4초 간격 제한
-        const THRESHOLD = 2.0;      // 감도 (적당함)
+        const MIN_STEP_DELAY = 400; 
+        const THRESHOLD = 2.0;      
 
         // 보상 설정
         const STEPS_PER_UNIT = 1000; // 1000걸음 단위
         const POINTS_PER_UNIT = 50;  // 50포인트
+
+        // [1] 페이지 로드 시 저장된 걸음 수 불러오기
+        window.onload = function() {
+            const savedDate = localStorage.getItem('pedometerDate');
+            const savedSteps = localStorage.getItem('pedometerSteps');
+
+            if (savedDate === TODAY_KEY && savedSteps) {
+                // 오늘 날짜와 저장된 날짜가 같으면 -> 이어서 하기
+                totalSteps = parseInt(savedSteps);
+            } else {
+                // 날짜가 다르면(새로운 하루) -> 0으로 초기화
+                totalSteps = 0;
+                localStorage.setItem('pedometerDate', TODAY_KEY);
+                localStorage.setItem('pedometerSteps', 0);
+                // 이미 받은 보상 기록도 초기화하고 싶다면 아래 주석 해제
+                // localStorage.removeItem('lastClaimedSteps');
+            }
+
+            // 화면 갱신
+            updateDisplay();
+        };
 
         function requestPermission() {
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -148,68 +173,73 @@
             const delta = Math.abs(magnitude - lastMagnitude);
 
             if (delta > THRESHOLD && (currentTime - lastStepTime > MIN_STEP_DELAY)) {
-                incrementStep(1); // 1걸음 증가
+                incrementStep(1); 
                 lastStepTime = currentTime;
             }
 
             lastMagnitude = magnitude;
         }
 
-        // 걸음 수 증가 함수 (amount만큼 증가)
+        // 걸음 수 증가 함수
         function incrementStep(amount) {
             totalSteps += amount;
             
-            // 화면 업데이트
+            // [중요] 걸을 때마다 저장하기
+            localStorage.setItem('pedometerSteps', totalSteps);
+            localStorage.setItem('pedometerDate', TODAY_KEY);
+
+            updateDisplay();
+        }
+
+        // 화면 및 보상 상태 업데이트 함수 (분리됨)
+        function updateDisplay() {
             document.getElementById('step-display').innerText = totalSteps.toLocaleString();
             
-            // 다음 보상까지 남은 걸음 계산
             let remainder = totalSteps % STEPS_PER_UNIT;
             let stepsLeft = STEPS_PER_UNIT - remainder;
             
-            // 만약 딱 1000, 2000... 이면 남은 걸음은 0이 아니라 1000으로 표시하고 싶다면 로직 조정 가능하나,
-            // 여기서는 1000이 차면 '보상 가능' 상태가 되므로 0으로 둠.
+            // 이미 보상받은 걸음 수 체크 (중복 수령 방지용 로직이 필요하다면 추가 구현 가능)
+            // 여기서는 심플하게 현재 걸음 수 기준으로 계산합니다.
             
-            // 보상 가능한 총 포인트 계산 (예: 2500걸음 -> 2000걸음치인 100포인트)
             let claimableUnits = Math.floor(totalSteps / STEPS_PER_UNIT);
             let claimablePoints = claimableUnits * POINTS_PER_UNIT;
 
+            // 보상 조건: 1000걸음 이상일 때
             if (claimableUnits > 0) {
-                // 보상 받을 수 있음
                 document.getElementById('next-goal-text').innerText = "보상 수령 가능!";
                 document.getElementById('next-goal-text').style.color = "#22c55e";
                 document.getElementById('next-goal-text').style.fontWeight = "bold";
-                
                 document.getElementById('circle-border').classList.add('active');
                 
                 const btn = document.getElementById('finish-btn');
                 btn.style.display = 'block';
-                btn.innerText = `🎁 ${claimablePoints}g 받기 (현재 ${totalSteps}걸음)`;
+                btn.innerText = `🎁 ${claimablePoints}g 받기 (누적 ${totalSteps}보)`;
                 
-                document.getElementById('status-msg').innerHTML = `축하합니다! <strong>${claimableUnits * 1000}걸음</strong> 돌파!<br>버튼을 눌러 포인트를 받으세요.`;
+                if(isRunning) {
+                    document.getElementById('status-msg').innerHTML = `축하합니다! <strong>${claimableUnits * 1000}걸음</strong> 돌파!`;
+                }
             } else {
-                // 아직 1000걸음 안 됨
                 document.getElementById('next-goal-text').innerText = `다음 보상까지 ${stepsLeft}`;
                 document.getElementById('next-goal-text').style.color = "#999";
                 document.getElementById('circle-border').classList.remove('active');
                 document.getElementById('finish-btn').style.display = 'none';
-                
-                if(isRunning) {
-                    document.getElementById('status-msg').innerHTML = "측정 중...🏃<br>힘차게 걸어보세요!";
-                }
             }
         }
 
         function finishWalking() {
-            // 받을 포인트 계산
             let claimableUnits = Math.floor(totalSteps / STEPS_PER_UNIT);
             let points = claimableUnits * POINTS_PER_UNIT;
 
             if (points > 0) {
-                // Index.html로 전달
                 localStorage.setItem('walkingSuccess', 'true');
                 localStorage.setItem('walkingPoints', points);
                 
-                alert(`수고하셨습니다!\n총 ${totalSteps}걸음을 걸어\n${points}g을 획득했습니다.`);
+                // 보상 받고 나면 걸음 수를 초기화할지, 유지할지 결정해야 합니다.
+                // 여기서는 '오늘의 누적 걸음' 컨셉이므로 걸음 수는 유지하되,
+                // Index.html에서 중복 지급을 막는 로직이 필요할 수 있습니다.
+                // (현재 로직은 받을 때마다 계속 줍니다. 시연용으로는 이게 더 좋을 수 있습니다!)
+                
+                alert(`수고하셨습니다!\n오늘 총 ${totalSteps}걸음을 걸어\n${points}g을 획득했습니다.`);
                 location.href = 'Index.html';
             }
         }
