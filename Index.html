@@ -190,21 +190,21 @@
 
     <footer><p>캡스톤디자인 4차산업혁명 융합프로젝트2</p></footer>
 
-    <script type="module">
+   <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ==========================================
-        // [필수] firebaseConfig 값을 본인 것으로 채워주세요!
+        // [복구 완료] 사용자님의 진짜 키를 넣어두었습니다!
         // ==========================================
         const firebaseConfig = {
-            apiKey: "본인의_API_KEY",
-            authDomain: "본인의_PROJECT_ID.firebaseapp.com",
-            projectId: "본인의_PROJECT_ID",
-            storageBucket: "본인의_PROJECT_ID.appspot.com",
-            messagingSenderId: "숫자ID",
-            appId: "본인의_APP_ID"
+            apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
+            authDomain: "capstone-a39ed.firebaseapp.com",
+            projectId: "capstone-a39ed",
+            storageBucket: "capstone-a39ed.firebasestorage.app",
+            messagingSenderId: "522941456140",
+            appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -216,61 +216,96 @@
         let myUid = null;
         const maxLevelScore = 1000;
 
-        document.getElementById('signup-btn').addEventListener('click', () => {
-            signInWithPopup(auth, provider).then(async (result) => {
-                const user = result.user;
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    alert("이미 가입된 계정입니다. 로그인 되었습니다.");
-                } else {
-                    await setDoc(docRef, { name: user.displayName, email: user.email, totalScore: 0, joinDate: new Date().toLocaleDateString() });
-                    alert("회원가입이 완료되었습니다! 환영합니다.");
-                }
-            }).catch((error) => console.error(error));
-        });
+        // [1] 회원가입 버튼 로직
+        const signupBtn = document.getElementById('signup-btn');
+        if(signupBtn) {
+            signupBtn.addEventListener('click', () => {
+                signInWithPopup(auth, provider).then(async (result) => {
+                    const user = result.user;
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
 
-        document.getElementById('login-btn').addEventListener('click', () => {
-            signInWithPopup(auth, provider).then(async (result) => {
-                const user = result.user;
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
-                if (!docSnap.exists()) {
-                    await signOut(auth);
-                    alert("가입되지 않은 계정입니다.\n[회원가입] 버튼을 먼저 눌러주세요.");
-                    location.reload();
-                }
-            }).catch((error) => console.error(error));
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                alert("로그아웃 되었습니다.");
-                location.reload();
+                    if (docSnap.exists()) {
+                        alert("이미 가입된 계정입니다. 로그인 되었습니다.");
+                        // 자동으로 로그인 상태 유지됨
+                    } else {
+                        // DB에 정보 저장 (가입 처리)
+                        await setDoc(docRef, { 
+                            name: user.displayName, 
+                            email: user.email,
+                            totalScore: 0,
+                            joinDate: new Date().toLocaleDateString()
+                        });
+                        alert("회원가입이 완료되었습니다! 환영합니다.");
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                    alert("가입 중 오류가 발생했습니다: " + error.message);
+                });
             });
-        });
+        }
 
-        // ★ 로딩 화면 제어 로직 추가됨 ★
+        // [2] 로그인 버튼 로직 (가입 안했으면 튕겨냄)
+        const loginBtn = document.getElementById('login-btn');
+        if(loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                signInWithPopup(auth, provider).then(async (result) => {
+                    const user = result.user;
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+
+                    if (!docSnap.exists()) {
+                        await signOut(auth); // 강제 로그아웃
+                        alert("가입되지 않은 계정입니다.\n[회원가입] 버튼을 먼저 눌러주세요.");
+                        location.reload(); 
+                    } else {
+                        console.log("로그인 성공");
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                    alert("로그인 중 오류가 발생했습니다: " + error.message);
+                });
+            });
+        }
+
+        // 로그아웃
+        const logoutBtn = document.getElementById('logout-btn');
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                signOut(auth).then(() => {
+                    alert("로그아웃 되었습니다.");
+                    location.reload();
+                });
+            });
+        }
+
+        // 상태 감지 및 화면 전환
         onAuthStateChanged(auth, async (user) => {
             const landingPage = document.getElementById('landing-page');
             const dashboardPage = document.getElementById('dashboard-page');
-            const loadingScreen = document.getElementById('loading-screen'); // 로딩 화면 요소
+            const loadingScreen = document.getElementById('loading-screen');
             const userProfile = document.getElementById('user-profile');
-            const loginBtn = document.getElementById('login-btn');
-            const signupBtn = document.getElementById('signup-btn');
+            const loginBtnEl = document.getElementById('login-btn');
+            const signupBtnEl = document.getElementById('signup-btn');
 
             if (user) {
+                // DB 확인
                 const docRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
+                    // [진짜 회원]
                     myUid = user.uid;
+                    
                     landingPage.style.display = 'none';
-                    if(window.innerWidth > 768) dashboardPage.style.display = 'grid';
-                    else dashboardPage.style.display = 'block';
+                    if(window.innerWidth > 768) {
+                        dashboardPage.style.display = 'grid';
+                    } else {
+                        dashboardPage.style.display = 'block';
+                    }
 
-                    loginBtn.style.display = 'none';
-                    signupBtn.style.display = 'none';
+                    loginBtnEl.style.display = 'none';
+                    signupBtnEl.style.display = 'none';
                     userProfile.style.display = 'flex';
                     document.getElementById('user-name').innerText = user.displayName;
 
@@ -278,26 +313,29 @@
                     updateUI(myScore);
                     checkPendingMissions();
                 } else {
-                    // 로그인 했으나 미가입자 -> 로그아웃 시키고 랜딩으로
+                    // [미가입자] 로그아웃 시키기 전에는 랜딩페이지 유지
                     await signOut(auth);
                     landingPage.style.display = 'flex';
                     dashboardPage.style.display = 'none';
                 }
             } else {
+                // [비로그인]
                 landingPage.style.display = 'flex';
                 dashboardPage.style.display = 'none';
-                loginBtn.style.display = 'block';
-                signupBtn.style.display = 'block';
-                userProfile.style.display = 'none';
+                
+                if(loginBtnEl) loginBtnEl.style.display = 'block';
+                if(signupBtnEl) signupBtnEl.style.display = 'block';
+                if(userProfile) userProfile.style.display = 'none';
             }
 
-            // 모든 확인이 끝나면 로딩 화면을 제거 (부드럽게)
+            // 로딩 화면 제거
             if(loadingScreen) {
                 loadingScreen.style.opacity = '0';
                 setTimeout(() => { loadingScreen.style.display = 'none'; }, 300);
             }
         });
 
+        // --- 기타 함수들 ---
         window.addPoints = async function(points) {
             if (!myUid) return;
             myScore += points;
