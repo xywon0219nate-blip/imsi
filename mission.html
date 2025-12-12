@@ -86,7 +86,7 @@
             <div class="gov-link-box">
                 📢 <strong>잠깐! 실제 포인트도 받으셨나요?</strong><br>
                 이 앱에서의 나무 성장과 별개로, 정부 공식 '탄소중립실천포인트' 제도 가입 후 현금 혜택도 꼭 챙기세요!
-                <a href="https://www.cpoint.or.kr/" target="_blank">👉 탄소중립포인트 공식 홈페이지 바로가기</a>
+                <a href="https://www.cpoint.or.kr/netzero/main.do" target="_blank">👉 탄소중립포인트 공식 홈페이지 바로가기</a>
             </div>
 
             <div class="btn-group">
@@ -109,17 +109,17 @@
         'tumbler': { 
             icon: '🥤', title: '텀블러 인증', 
             desc: '카페에서 텀블러를 사용하는 모습을<br>사진으로 찍어주세요!', 
-            point: 300 
+            point: 30 
         },
         'refill': { 
             icon: '🧴', title: '리필스테이션 이용', 
             desc: '샴푸, 세제 등을 리필하는 모습을<br>사진으로 인증해주세요.', 
-            point: 500 
+            point: 200 
         },
         'receipt': { 
             icon: '🧾', title: '전자영수증 발급', 
             desc: '종이영수증 대신 전자영수증을<br>발급받은 내역을 캡쳐해주세요.', 
-            point: 100 
+            point: 10 
         }
         // 메일함 등은 삭제하거나 유지 가능
     };
@@ -144,7 +144,7 @@
                 btn.disabled = false;
                 btn.style.backgroundColor = '#457b9d';
                 btn.style.cursor = 'pointer';
-                btn.innerText = "관리자에게 심사 요청";
+                btn.innerText = "제출하기";
             };
             reader.readAsDataURL(input.files[0]);
         }
