@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>고객센터 - FindMyRide</title>
+    <title>고객센터</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
         :root {
@@ -171,7 +171,7 @@
         </div>
 
         <div class="action-bar">
-            <div></div> <button class="btn btn-write" id="writeBtn" onclick="openModal()">✏️ 문의 작성하기</button>
+            <div></div> <button class="btn btn-write" id="writeBtn" onclick="openModal()">작성</button>
         </div>
 
         <div id="notice-tab" class="tab-content active">
@@ -217,7 +217,7 @@
             <ul class="list-wrap" id="qna-list">
                 </ul>
             <div id="empty-msg" style="text-align:center; padding:50px; color:#94a3b8; display:none;">
-                <p style="font-size:3rem; margin-bottom:10px;">📭</p>
+                <p style="font-size:3rem; margin-bottom:10px;"></p>
                 작성된 문의 내역이 없습니다.
             </div>
         </div>
@@ -382,7 +382,7 @@
                 if (item.status === 'done') {
                     replyHtml = `
                         <div class="admin-reply">
-                            <span class="reply-title">💬 관리자 답변</span>
+                            <span class="reply-title">관리자 답변</span>
                             <p>${item.answer.replace(/\n/g, '<br>')}</p>
                         </div>`;
                 } else {
