@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>대여소 찾기 - FindMyRide</title>
+  <title>대여소 찾기</title>
 
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
   <style>
@@ -18,7 +18,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     body { background-color: var(--bg-color); color: var(--dark-blue); }
 
-    /* --- [수정됨] 헤더 스타일 (Index.html과 통일) --- */
+    /* 헤더 */
     header {
       width: 100%;
       background: #fff;
@@ -35,7 +35,7 @@
         text-decoration: none; z-index: 1002; margin-right: auto; 
     }
 
-    /* 메뉴 리스트 (중앙 배치) */
+    /* 메뉴 */
     .nav-links { 
         display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; 
         position: absolute; left: 50%; transform: translateX(-50%);
@@ -46,13 +46,13 @@
     }
     .nav-links a:hover { color: var(--main-blue); }
 
-    /* 햄버거 메뉴 (모바일용) */
+    /* 햄버거*/
     .hamburger { 
         display: none; cursor: pointer; font-size: 24px; 
         color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; 
     }
 
-    /* --- 검색창 디자인 --- */
+    /* 검색창 */
     .search-wrapper {
         position: absolute;
         top: 20px; left: 50%; transform: translateX(-50%);
@@ -81,7 +81,7 @@
     }
     .search-btn:hover { background: var(--dark-blue); }
 
-    /* 연관 검색어 박스 */
+    /* 연관 검색어 */
     .suggestion-box {
         background: white; margin-top: 8px; border-radius: 20px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.15); max-height: 250px;
@@ -98,7 +98,7 @@
     .s-id { font-weight: bold; color: var(--main-blue); margin-right: 10px; min-width: 40px; }
     .s-name { color: #333; flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* --- 지도 영역 --- */
+    /* 지도 영역 */
     .hero { position: relative; height: calc(100vh - 70px); width: 100%; }
     #map { width: 100%; height: 100%; }
 
@@ -182,7 +182,7 @@
         <div id="suggestion-box" class="suggestion-box"></div>
     </div>
 
-    <div class="loading-message" id="loadingMsg" style="display:block;">📍 내 위치와 주변 따릉이를 찾는 중...</div>
+    <div class="loading-message" id="loadingMsg" style="display:block;"> 내 위치와 주변 따릉이를 찾는 중...</div>
     <div id="map"></div>
   </section>
 
@@ -207,7 +207,7 @@
         btn.innerHTML = nav.classList.contains('active') ? "✕" : "☰";
     }
 
-    // --- 페이지 로드 시 위치 확인 ---
+    // 페이지 로드 시 위치 확인
     window.onload = function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -254,7 +254,7 @@
 
     async function loadBikeStations(centerLat, centerLng) {
         const loadingMsg = document.getElementById('loadingMsg');
-        loadingMsg.innerText = "🚴 주변 자전거 정보를 가져오는 중...";
+        loadingMsg.innerText = "주변 대여소 정보를 가져오는 중...";
         loadingMsg.style.display = 'block';
 
         try {
@@ -286,7 +286,7 @@
         }
     }
 
-    // --- 검색 로직 ---
+    // 검색 로직
     function checkKeyword() {
         const keyword = document.getElementById('keyword').value.trim();
         const suggestionBox = document.getElementById('suggestion-box');
@@ -356,7 +356,7 @@
         });
     }
 
-    // --- 유틸리티 ---
+    // 유틸리티
     function getDistance(lat1, lng1, lat2, lng2) {
       const R = 6371e3;
       const toRad = deg => deg * (Math.PI / 180);
