@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyRide - 나만의 작은 숲</title>
+    <title>FindMyRide</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
         :root {
@@ -235,7 +235,7 @@
             <button id="signup-btn" class="auth-btn">회원가입</button>
             <button id="login-btn" class="auth-btn">로그인</button>
             <div id="user-profile">
-                <span id="user-name"></span>님 환영합니다!
+                <span id="user-name"></span>님
                 <button id="logout-btn">로그아웃</button>
             </div>
         </div>
@@ -246,7 +246,7 @@
         <div class="hero-img">🌍</div>
         <h1 class="hero-title">지구를 위한<br><span>가장 쉬운 실천</span></h1>
         <p class="hero-desc">FindMyRide와 함께 일상 속 탄소를 줄여보세요.<br>회원가입 후 나만의 나무를 키워보세요.</p>
-        <button onclick="document.getElementById('signup-btn').click()" class="action-btn" style="background:var(--dark-blue); color:white; border:none; padding:15px 40px; font-size:18px; justify-content: center;">지금 바로 시작하기 (회원가입)</button>
+        <button onclick="document.getElementById('signup-btn').click()" class="action-btn" style="background:var(--dark-blue); color:white; border:none; padding:15px 40px; font-size:18px; justify-content: center;">지금 바로 시작하기</button>
     </div>
 
     <div id="dashboard-page" class="dashboard-container">
@@ -512,13 +512,7 @@
                     showToast(`미션 승인 완료! ${newPoints}g 획득`);
                 }, 800);
             }
-            if (localStorage.getItem('isRiding') === 'true') {
-                setTimeout(() => {
-                    window.addPoints(500);
-                    showToast("🚲 따릉이 탐험 보상 획득!");
-                }, 1000);
-                localStorage.removeItem('isRiding');
-            }
+            
             if (localStorage.getItem('walkingSuccess') === 'true') {
                 const pts = parseInt(localStorage.getItem('walkingPoints'));
                 setTimeout(() => {
