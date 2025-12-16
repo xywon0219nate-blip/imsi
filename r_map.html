@@ -12,15 +12,16 @@
       --light-blue: #a8dadc;
       --dark-blue: #1d3557;
       --bg-color: #fafafa;
-      --recycle-green: #2ecc71;
+      --recycle-green: #2ecc71; /* 재활용 테마 컬러 */
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     
-    /* [중요] 지도가 뜨려면 높이 값이 명확해야 합니다 */
+    /* 지도 꽉 차게 설정 */
     body, html { height: 100%; width: 100%; }
     body { background-color: var(--bg-color); color: var(--dark-blue); display: flex; flex-direction: column; }
 
+    /* --- 헤더 (test2.html과 동일한 디자인) --- */
     header {
       width: 100%; background: #fff; display: flex; align-items: center; justify-content: space-between;
       padding: 15px 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 1000;
@@ -33,57 +34,73 @@
 
     .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; }
 
-    /* 지도 영역 - flex-grow로 남은 공간 꽉 채우기 */
+    /* --- 지도 및 필터 영역 --- */
     .hero { 
         position: relative; 
-        flex-grow: 1; 
+        flex-grow: 1; /* 남은 공간 채우기 */
         width: 100%; 
-        min-height: 0; /* flex 자식 요소 높이 버그 방지 */
+        min-height: 0;
     }
     #map { width: 100%; height: 100%; }
 
+    /* 카테고리 필터 버튼 (따릉이 검색창 위치에 배치) */
     .category-filters {
         position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-        z-index: 100; display: flex; gap: 10px; width: 90%; max-width: 600px;
-        overflow-x: auto; padding-bottom: 5px;
+        z-index: 100; display: flex; gap: 8px; width: 90%; max-width: 600px;
+        overflow-x: auto; padding-bottom: 5px; /* 스크롤바 공간 */
+        -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
     }
+    /* 스크롤바 숨기기 */
+    .category-filters::-webkit-scrollbar { display: none; }
+
     .filter-btn {
-        background: white; border: 1px solid #ddd; padding: 10px 18px;
+        background: white; border: 1px solid #ddd; padding: 10px 16px;
         border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap;
         display: flex; align-items: center; gap: 6px; transition: all 0.2s;
-        color: #555;
+        color: #555; flex-shrink: 0;
     }
-    .filter-btn:hover { background: #f8f9fa; }
+    .filter-btn:hover { background: #f8f9fa; transform: translateY(-2px); }
     .filter-btn.active {
         background: var(--dark-blue); color: white; border-color: var(--dark-blue);
         box-shadow: 0 4px 10px rgba(29, 53, 87, 0.3);
     }
 
+    /* 로딩 메시지 */
     .loading-message {
       position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-      background: rgba(46, 204, 113, 0.9); padding: 12px 24px;
+      background: rgba(46, 204, 113, 0.95); padding: 12px 24px;
       border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       font-size: 14px; font-weight: 600; color: white;
       z-index: 15; display: none; white-space: nowrap;
+      animation: fadeInUp 0.3s;
     }
+    @keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
+    /* 커스텀 오버레이 (말풍선 디자인) */
     .custom-overlay {
       position: relative; background: white; border-radius: 12px;
       padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      border: 2px solid var(--recycle-green); min-width: 200px;
+      border: 2px solid var(--recycle-green); min-width: 220px;
+      animation: fadeIn 0.2s;
     }
     .custom-overlay::after {
       content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
       border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid white;
     }
-    .overlay-title { font-weight: 700; color: var(--dark-blue); font-size: 16px; margin-bottom: 5px; }
-    .overlay-addr { font-size: 13px; color: #666; margin-bottom: 8px; }
+    .overlay-header { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+    .overlay-title { font-weight: 700; color: var(--dark-blue); font-size: 16px; }
+    .close-btn { border: none; background: none; color: #999; font-size: 18px; cursor: pointer; padding: 0; }
+    
+    .overlay-addr { font-size: 13px; color: #666; margin-bottom: 10px; line-height: 1.4; }
     .overlay-link { 
-        display: block; text-align: center; background: #f1f5f9; color: var(--main-blue);
-        text-decoration: none; padding: 6px; border-radius: 6px; font-size: 12px; font-weight: bold;
+        display: block; text-align: center; background: #f0fff4; color: var(--recycle-green);
+        text-decoration: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: bold;
+        transition: background 0.2s;
     }
+    .overlay-link:hover { background: #dcfce7; }
 
+    /* 반응형 */
     @media (max-width: 768px) {
         header { padding: 15px 20px; }
         .nav-links { 
@@ -95,6 +112,7 @@
         }
         .nav-links.active { right: 0; }
         .hamburger { display: block; margin-left: auto; }
+        
         .category-filters { justify-content: flex-start; padding-left: 5%; width: 100%; }
     }
   </style>
@@ -114,51 +132,48 @@
 
   <section class="hero">
     <div class="category-filters">
-        <button class="filter-btn active" onclick="changeCategory('네프론')"><span>🤖</span> 네프론(로봇)</button>
+        <button class="filter-btn active" onclick="changeCategory('네프론')"><span>🤖</span> 네프론</button>
         <button class="filter-btn" onclick="changeCategory('아름다운가게')"><span>👕</span> 아름다운가게</button>
-        <button class="filter-btn" onclick="changeCategory('주민센터')"><span>🔋</span> 폐건전지(주민센터)</button>
+        <button class="filter-btn" onclick="changeCategory('주민센터')"><span>🔋</span> 폐건전지</button>
         <button class="filter-btn" onclick="changeCategory('제로웨이스트')"><span>🌿</span> 제로웨이스트</button>
     </div>
 
-    <div class="loading-message" id="loadingMsg">📍 지도 불러오는 중...</div>
+    <div class="loading-message" id="loadingMsg">📍 내 위치를 찾는 중...</div>
     <div id="map"></div>
   </section>
 
   <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=dbb43de48b1358f249618a62dade6804&libraries=services"></script>
 
   <script>
-    let map, ps;
+    let map, ps, currentOverlay = null;
     let markers = [];
-    let currCategory = '네프론'; 
+    let currCategory = '네프론'; // 기본 검색어
 
     function toggleMenu() {
-        document.getElementById('nav-links').classList.toggle('active');
+        const nav = document.getElementById('nav-links');
         const btn = document.querySelector('.hamburger');
-        btn.innerHTML = document.getElementById('nav-links').classList.contains('active') ? "✕" : "☰";
+        nav.classList.toggle('active');
+        btn.innerHTML = nav.classList.contains('active') ? "✕" : "☰";
     }
 
     // 1. 페이지 로드 시 실행
     window.onload = function() {
-        // 위치 권한 확인
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    // 성공 시: 내 위치로 지도 생성
+                (position) => {
                     initMap(position.coords.latitude, position.coords.longitude);
                 },
-                function(error) {
-                    // 실패/거부 시: 서울시청 기준 생성
-                    console.warn("위치 권한 거부됨, 기본 위치로 이동");
-                    initMap(37.566826, 126.9786567);
+                (error) => {
+                    console.warn("위치 권한 거부됨");
+                    initMap(37.5665, 126.9780); // 서울시청 기본값
                 }
             );
         } else {
-            // 브라우저 미지원 시
-            initMap(37.566826, 126.9786567);
+            initMap(37.5665, 126.9780);
         }
     };
 
-    // 2. 지도 초기화 함수
+    // 2. 지도 초기화
     function initMap(lat, lng) {
         const container = document.getElementById('map');
         const options = { center: new kakao.maps.LatLng(lat, lng), level: 5 };
@@ -166,27 +181,27 @@
         map = new kakao.maps.Map(container, options);
         ps = new kakao.maps.services.Places();
 
-        // 내 위치 마커 (파란 점) 표시
+        // 내 위치 마커 (파란 점)
         const locPosition = new kakao.maps.LatLng(lat, lng);
-        const imageSrc = 'https://cdn-icons-png.flaticon.com/512/3177/3177361.png'; // 내 위치 아이콘
+        const imageSrc = 'https://cdn-icons-png.flaticon.com/512/3177/3177361.png'; 
         const imageSize = new kakao.maps.Size(32, 32);
         const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
         
         new kakao.maps.Marker({ map: map, position: locPosition, image: markerImage, title: '내 위치' });
 
-        // 지도 생성 후 기본 카테고리로 검색 시작
+        // 첫 검색 실행
         searchPlaces(currCategory);
     }
 
-    // 3. 카테고리 변경 시 실행
+    // 3. 카테고리 변경
     function changeCategory(keyword) {
         currCategory = keyword;
         searchPlaces(keyword);
     }
 
-    // 4. 장소 검색 실행
+    // 4. 장소 검색 (내 위치 기준 5km)
     function searchPlaces(keyword) {
-        // 버튼 활성화 스타일 처리
+        // 버튼 활성화 UI 처리
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.remove('active');
             if(btn.innerText.includes(keyword.split('(')[0])) btn.classList.add('active');
@@ -196,7 +211,6 @@
         loading.style.display = 'block';
         loading.innerText = `'${keyword}' 주변 검색 중...`;
 
-        // 지도 중심 기준 5km 반경 검색
         const center = map.getCenter();
         const options = {
             location: center,
@@ -207,7 +221,7 @@
         ps.keywordSearch(keyword, placesSearchCB, options);
     }
 
-    // 5. 검색 결과 콜백
+    // 5. 검색 결과 처리
     function placesSearchCB(data, status, pagination) {
         document.getElementById('loadingMsg').style.display = 'none';
         
@@ -215,24 +229,28 @@
             displayPlaces(data);
         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
             alert(`주변 5km 내에 '${currCategory}' 검색 결과가 없습니다.`);
-            removeMarker(); // 기존 마커 지우기
+            removeMarker();
         } else {
-            // 에러 발생 시 (API 키 문제 등)
-            alert('검색 중 오류가 발생했습니다. (API 키 또는 도메인을 확인하세요)');
+            alert('검색 중 오류가 발생했습니다.');
         }
     }
 
     // 6. 마커 표시
     function displayPlaces(places) {
         removeMarker();
+        const bounds = new kakao.maps.LatLngBounds();
 
         for ( var i=0; i<places.length; i++ ) {
             addMarker(places[i]);
+            bounds.extend(new kakao.maps.LatLng(places[i].y, places[i].x));
         }
+        
+        // 검색된 장소들이 잘 보이도록 지도 범위 재설정 (내 위치가 포함되면 좋음)
+        // map.setBounds(bounds); // (선택사항: 너무 멀리 튀는 경우 방지 위해 주석 처리하거나 사용 가능)
     }
 
     function addMarker(place) {
-        // 초록색 리사이클 마커
+        // 초록색 리사이클 마커 아이콘
         const imageSrc = 'https://cdn-icons-png.flaticon.com/512/684/684908.png'; 
         const imageSize = new kakao.maps.Size(36, 36); 
         const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
@@ -243,13 +261,16 @@
             image: markerImage
         });
 
-        // 클릭 이벤트 (커스텀 오버레이)
+        // 마커 클릭 이벤트
         kakao.maps.event.addListener(marker, 'click', function() {
             closeOverlay();
             
             const content = `
                 <div class="custom-overlay">
-                    <div class="overlay-title">${place.place_name}</div>
+                    <div class="overlay-header">
+                        <span class="overlay-title">${place.place_name}</span>
+                        <button class="close-btn" onclick="closeOverlay()">×</button>
+                    </div>
                     <div class="overlay-addr">${place.road_address_name || place.address_name}</div>
                     <a href="${place.place_url}" target="_blank" class="overlay-link">상세정보 / 길찾기</a>
                 </div>
@@ -262,10 +283,7 @@
                 yAnchor: 1.45
             });
             
-            overlay.setMap(map);
             window.currentOverlay = overlay;
-            
-            // 클릭한 마커로 지도 중심 이동
             map.panTo(marker.getPosition());
         });
 
@@ -280,7 +298,8 @@
         closeOverlay();
     }
 
-    function closeOverlay() {
+    // 전역 함수로 등록 (HTML onclick에서 접근 가능하도록)
+    window.closeOverlay = function() {
         if (window.currentOverlay) {
             window.currentOverlay.setMap(null);
             window.currentOverlay = null;
