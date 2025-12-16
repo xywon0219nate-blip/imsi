@@ -239,6 +239,7 @@
         const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
         new kakao.maps.Marker({ map: map, position: locPosition, image: markerImage, title: '내 위치' });
 
+        // 초기 로딩 시 주변 데이터 검색
         searchPlaces(currCategory);
     }
 
@@ -246,6 +247,7 @@
     function changeCategory(keyword) {
         currCategory = keyword;
         updateFilterButtons();
+        // 현재 지도 중심 기준으로 다시 검색
         searchPlaces(currCategory);
     }
 
@@ -276,17 +278,17 @@
         });
     }
 
-    // [핵심 변경] 실제 데이터 검색 함수
+    // 실제 데이터 검색 함수 (키워드 완화)
     function searchPlaces(category) {
         const loading = document.getElementById('loadingMsg');
         loading.style.display = 'block';
         loading.innerText = `'${category === '주민센터' ? '폐건전지 수거함' : category}' 검색 중...`;
 
-        // ★ 정확도 향상을 위한 키워드 변환 ★
+        // [수정] 검색 키워드를 단순히 '제로웨이스트'로 넓힘
+        // (이전에는 '제로웨이스트 상점'이어서 카페 등이 누락됨)
         let query = category;
         if (category === '제로웨이스트') {
-            // 단순 '제로웨이스트' 대신 '제로웨이스트 상점'으로 검색하여 정확도 높임
-            query = '제로웨이스트 상점'; 
+            query = '제로웨이스트'; 
         }
 
         const center = map.getCenter();
