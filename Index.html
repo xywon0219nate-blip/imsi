@@ -60,7 +60,7 @@
 
         .dashboard-container { flex: 1; max-width: 1200px; margin: 40px auto; width: 90%; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
         .tree-section { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; border: 1px solid #eee; position: relative; overflow: hidden; }
-        #tree-display { font-size: 150px; margin: 30px 0; transition: transform 0.3s; cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
+        #tree-display { font-size: 150px; margin: 30px 0; transition: transform 0.3s; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); cursor: default; }
         .grow-animation { transform: scale(1.2); }
         .score-badge { background-color: var(--light-blue); color: var(--dark-blue); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: inline-block; }
         .progress-container { width: 80%; background-color: #e5e7eb; border-radius: 15px; height: 30px; overflow: hidden; position: relative; margin-bottom: 10px; }
@@ -136,10 +136,10 @@
     <div id="dashboard-page" class="dashboard-container">
         <section class="tree-section">
             <div class="score-badge">오늘 줄인 탄소: <span id="score">0</span>g</div>
-            <div id="tree-display" onclick="pokeTree()">🌱</div>
+            <div id="tree-display">🌱</div>
             <h3 id="level-name">Level 1. 파릇파릇 새싹</h3>
             <div class="progress-container"><div id="progress-fill"></div><div id="progress-text">0%</div></div>
-            <p style="color:#888; font-size: 14px; margin-top:10px;">나무를 클릭해서 사랑을 주세요!</p>
+            <p style="color:#888; font-size: 14px; margin-top:10px;">탄소를 줄이면 나무가 무럭무럭 자랍니다!</p>
         </section>
         
         <section class="control-section">
@@ -150,15 +150,15 @@
                     <span class="icon">📸</span>
                     <div class="text-area">
                         <span class="label">오늘의 탄소 줄이기 인증하기</span>
-                        <span class="sub">텀블러, 리필스테이션, 전자영수증 인증하러 가기</span>
+                        <span class="sub">텀블러, 리필스테이션, 전자영수증 인증</span>
                     </div>
                 </button>
 
-                <button class="action-btn" onclick="location.href='pedometer.html'">
-                    <span class="icon">👟</span>
+                <button class="action-btn" onclick="goToAiRecycle()">
+                    <span class="icon">♻️</span>
                     <div class="text-area">
-                        <span class="label">걷기 (만보기)</span>
-                        <span class="sub">1,000보 당 +50P</span>
+                        <span class="label">AI 분리배출 진단</span>
+                        <span class="sub">사진 찍고 올바르게 버리기</span>
                     </div>
                 </button>
 
@@ -321,7 +321,7 @@
             myScore += points;
             updateUI(myScore);
             showFloatingText(`+${points}g`);
-            window.pokeTree();
+            window.pokeTree(); // 애니메이션만 실행됨 (클릭 이벤트 X)
             const docRef = doc(db, "users", myUid);
             await updateDoc(docRef, { totalScore: increment(points) });
         }
@@ -351,15 +351,6 @@
                     showToast("🚲 따릉이 탐험 보상 획득!");
                 }, 1000);
                 localStorage.removeItem('isRiding');
-            }
-            if (localStorage.getItem('walkingSuccess') === 'true') {
-                const pts = parseInt(localStorage.getItem('walkingPoints'));
-                setTimeout(() => {
-                    window.addPoints(pts);
-                    showToast("🚶 걷기 목표 달성 보상!");
-                }, 1200);
-                localStorage.removeItem('walkingSuccess');
-                localStorage.removeItem('walkingPoints');
             }
         }
 
@@ -393,6 +384,16 @@
             localStorage.setItem('isRiding', 'true');
             location.href = 'test2.html';
         }
+        
+        // [NEW] AI 분리배출 이동 함수
+        window.goToAiRecycle = function() {
+            if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
+            // 추후 개발할 ai_recycle.html로 이동하도록 설정
+            if(confirm("AI 분리배출 페이지로 이동하시겠습니까? (현재 페이지는 개발 예정입니다)")) {
+                location.href = 'ai_recycle.html'; 
+            }
+        }
+
         window.pokeTree = function() {
             const tree = document.getElementById('tree-display');
             tree.classList.remove('grow-animation');
@@ -410,7 +411,6 @@
             }
         }
 
-        // [추가] 모달 제어 함수
         window.openMissionModal = function() {
             if(!auth.currentUser) { alert("로그인이 필요한 서비스입니다."); return; }
             document.getElementById('mission-modal').style.display = 'flex';
