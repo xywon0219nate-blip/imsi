@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
         body { font-family: 'Pretendard', sans-serif; background: #1e293b; color: white; padding: 40px; max-width: 900px; margin: 0 auto; }
-        h1 { border-bottom: 1px solid #475569; padding-bottom: 20px; margin-bottom: 30px; }
         
         /* 탭 스타일 */
         .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid #475569; padding-bottom: 10px; }
@@ -16,88 +15,68 @@
         }
         .tab-btn.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; }
 
-        /* 컨텐츠 영역 */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* 리스트 아이템 공통 스타일 */
+        /* 리스트 스타일 */
         .list-item {
             background: #334155; padding: 20px; border-radius: 12px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); gap: 20px;
+            display: flex; justify-content: space-between; align-items: center; gap: 20px;
         }
-
-        /* 인증 승인 관련 스타일 */
-        .proof-img {
-            width: 100px; height: 100px; object-fit: cover;
-            border-radius: 8px; border: 2px solid #475569; cursor: pointer; transition: transform 0.2s;
-        }
-        .proof-img:hover { transform: scale(1.1); }
-
         .info-container { flex: 1; }
-        .info-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
-        .info-sub { font-size: 0.9rem; color: #94a3b8; margin-bottom: 5px; }
-        .q-content { background: #1e293b; padding: 10px; border-radius: 6px; font-size: 0.95rem; color: #e2e8f0; margin-top: 5px; }
+        .title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .sub-text { font-size: 0.9rem; color: #94a3b8; margin-bottom: 5px; }
+        .q-text { background: #1e293b; padding: 10px; border-radius: 6px; font-size: 0.95rem; color: #e2e8f0; margin-top: 5px; }
+        .a-text { color: #38bdf8; margin-top: 5px; font-weight: bold; }
 
-        /* 버튼 스타일 */
-        button.action-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; white-space: nowrap; }
+        /* 이미지 스타일 */
+        .proof-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid #475569; }
+
+        /* 버튼 */
+        button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-approve { background: #22c55e; color: white; }
-        .btn-approve:hover { background: #16a34a; transform: scale(1.05); }
-        
         .btn-reply { background: #38bdf8; color: white; }
-        .btn-reply:hover { background: #0ea5e9; transform: scale(1.05); }
+        .btn-done { background: #64748b; color: #cbd5e1; cursor: default; }
 
-        .btn-complete { background: #64748b; color: #cbd5e1; cursor: default; } /* 완료된 상태 */
-
-        .empty-msg { color: #94a3b8; text-align: center; margin-top: 50px; font-size: 1.1rem; }
-        .back-link { display: block; margin-top: 30px; color: #38bdf8; text-decoration: none; text-align: center; }
-
-        /* 답변 모달 */
+        /* 모달 */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000;
         }
-        .modal-box {
-            background: #1e293b; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; border: 1px solid #475569;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        .modal-title { font-size: 1.3rem; margin-bottom: 15px; font-weight: bold; }
-        .modal-textarea {
-            width: 100%; height: 120px; padding: 10px; border-radius: 8px; border: 1px solid #475569;
-            background: #334155; color: white; resize: none; margin-bottom: 15px; font-family: inherit;
-        }
+        .modal-box { background: #1e293b; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; border: 1px solid #475569; }
+        .modal-textarea { width: 100%; height: 100px; margin: 15px 0; background: #334155; color: white; border: 1px solid #475569; padding: 10px; resize: none; }
         .modal-btns { display: flex; justify-content: flex-end; gap: 10px; }
-        .btn-cancel { background: #ef4444; color: white; }
+        
+        .empty-msg { text-align: center; color: #94a3b8; margin-top: 30px; }
+        .back-link { display: block; margin-top: 30px; color: #38bdf8; text-align: center; text-decoration: none; }
     </style>
 </head>
 <body>
-    <h1>🛠️ FindMyRide 관리자 모드</h1>
+    <h1 style="border-bottom: 1px solid #475569; padding-bottom: 20px;">🛡️ 관리자 페이지</h1>
     
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('cert')">🛡️ 인증 승인</button>
-        <button class="tab-btn" onclick="switchTab('inquiry')">💬 1:1 문의 관리</button>
+        <button class="tab-btn active" onclick="switchTab('cert')">인증 승인</button>
+        <button class="tab-btn" onclick="switchTab('inquiry')">1:1 문의 관리</button>
     </div>
 
     <div id="tab-cert" class="tab-content active">
-        <p style="color:#cbd5e1; margin-bottom: 20px;">사용자가 제출한 탄소중립 실천 사진을 확인하고 포인트를 지급하세요.</p>
         <div id="cert-list"></div>
     </div>
 
     <div id="tab-inquiry" class="tab-content">
-        <p style="color:#cbd5e1; margin-bottom: 20px;">사용자의 문의사항에 답변을 등록하세요.</p>
         <div id="inquiry-list"></div>
     </div>
 
-    <a href="Notice.html" class="back-link">← 사용자 공지사항(문의) 페이지 확인하기</a>
+    <a href="Notice.html" class="back-link">← 사용자 페이지(Notice.html)로 이동</a>
 
     <div class="modal-overlay" id="replyModal">
         <div class="modal-box">
-            <div class="modal-title">답변 작성하기</div>
-            <div id="modal-q-text" style="margin-bottom: 10px; color: #94a3b8; font-size: 0.9rem;"></div>
-            <textarea id="replyText" class="modal-textarea" placeholder="답변 내용을 입력하세요..."></textarea>
+            <h3>답변 작성하기</h3>
+            <p id="modal-q-text" style="font-size:0.9rem; color:#94a3b8; margin-top:10px;"></p>
+            <textarea id="replyText" class="modal-textarea" placeholder="답변을 입력하세요"></textarea>
             <div class="modal-btns">
-                <button class="action-btn btn-cancel" onclick="closeModal()">취소</button>
-                <button class="action-btn btn-reply" onclick="submitReply()">등록</button>
+                <button onclick="closeModal()" style="background:#ef4444; color:white;">취소</button>
+                <button onclick="submitReply()" style="background:#38bdf8; color:white;">등록</button>
             </div>
         </div>
     </div>
@@ -105,7 +84,6 @@
     <script>
         let currentReplyId = null;
 
-        // 탭 전환 함수
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -123,130 +101,91 @@
 
         // --- 1. 인증 승인 로직 ---
         function loadCertifications() {
-            const container = document.getElementById('cert-list');
+            const list = document.getElementById('cert-list');
             const reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
-            const pendingList = reviewList.filter(item => item.status === 'pending');
+            const pending = reviewList.filter(i => i.status === 'pending');
 
-            if (pendingList.length === 0) {
-                container.innerHTML = "<div class='empty-msg'>대기 중인 인증 요청이 없습니다.</div>";
-                return;
-            }
+            if (pending.length === 0) { list.innerHTML = "<div class='empty-msg'>대기 중인 인증 요청이 없습니다.</div>"; return; }
 
             let html = '';
-            pendingList.forEach(item => {
+            pending.forEach(item => {
                 html += `
                     <div class="list-item">
-                        <img src="${item.image}" class="proof-img" onclick="window.open(this.src)" onerror="this.src='https://via.placeholder.com/100x100?text=No+Image'">
+                        <img src="${item.image}" class="proof-img" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
                         <div class="info-container">
-                            <div class="info-title">📸 ${item.name}</div>
-                            <div class="info-sub">요청일: ${item.date} | 지급 포인트: ${item.point}g</div>
+                            <div class="title">${item.name}</div>
+                            <div class="sub-text">${item.date} | ${item.point}g</div>
                         </div>
-                        <button class="action-btn btn-approve" onclick="approveItem(${item.id})">승인</button>
-                    </div>
-                `;
+                        <button class="btn-approve" onclick="approveCert(${item.id})">승인</button>
+                    </div>`;
             });
-            container.innerHTML = html;
+            list.innerHTML = html;
         }
 
-        function approveItem(id) {
-            let reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
-            const updatedList = reviewList.map(item => {
-                if (item.id === id) return { ...item, status: 'approved' };
-                return item;
-            });
-            localStorage.setItem('reviewList', JSON.stringify(updatedList));
-            alert("✅ 승인 완료되었습니다.");
+        function approveCert(id) {
+            let list = JSON.parse(localStorage.getItem('reviewList') || '[]');
+            list = list.map(item => item.id === id ? { ...item, status: 'approved' } : item);
+            localStorage.setItem('reviewList', JSON.stringify(list));
+            alert("승인되었습니다.");
             loadCertifications();
         }
 
-
-        // --- 2. 문의 관리 로직 ---
+        // --- 2. 문의 답변 로직 ---
         function loadInquiries() {
-            const container = document.getElementById('inquiry-list');
-            // Notice.html에서 저장한 'inquiryList'를 불러옴
-            const inquiryList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+            const list = document.getElementById('inquiry-list');
+            const inquiries = JSON.parse(localStorage.getItem('inquiryList') || '[]');
             
-            // 답변 대기중인 항목을 위로 정렬 (옵션)
-            inquiryList.sort((a, b) => (a.status === 'wait' ? -1 : 1));
+            // 답변 대기중인 것을 위로 정렬
+            inquiries.sort((a, b) => (a.status === 'wait' ? -1 : 1));
 
-            if (inquiryList.length === 0) {
-                container.innerHTML = "<div class='empty-msg'>등록된 문의가 없습니다.</div>";
-                return;
-            }
+            if (inquiries.length === 0) { list.innerHTML = "<div class='empty-msg'>등록된 문의가 없습니다.</div>"; return; }
 
             let html = '';
-            inquiryList.forEach(item => {
+            inquiries.forEach(item => {
                 const isWait = item.status === 'wait';
-                const statusBadge = isWait ? '🔴 답변 대기' : '🔵 답변 완료';
-                const btnHtml = isWait 
-                    ? `<button class="action-btn btn-reply" onclick="openModal(${item.id})">답변 달기</button>` 
-                    : `<button class="action-btn btn-complete" disabled>완료됨</button>`;
+                const btn = isWait 
+                    ? `<button class="btn-reply" onclick="openModal(${item.id})">답변하기</button>` 
+                    : `<button class="btn-done" disabled>완료됨</button>`;
 
                 html += `
                     <div class="list-item">
                         <div class="info-container">
-                            <div class="info-sub">${statusBadge} | ${item.date}</div>
-                            <div class="info-title">${item.title}</div>
-                            <div class="q-content">Q. ${item.content}</div>
-                            ${!isWait ? `<div class="q-content" style="color:#38bdf8;">A. ${item.answer}</div>` : ''}
+                            <div class="sub-text">${isWait ? '🔴 대기중' : '🔵 답변완료'} | ${item.date}</div>
+                            <div class="title">${item.title}</div>
+                            <div class="q-text">Q. ${item.content}</div>
+                            ${!isWait ? `<div class="a-text">A. ${item.answer}</div>` : ''}
                         </div>
-                        ${btnHtml}
-                    </div>
-                `;
+                        ${btn}
+                    </div>`;
             });
-            container.innerHTML = html;
+            list.innerHTML = html;
         }
 
-        // 모달 열기
         function openModal(id) {
             currentReplyId = id;
-            const inquiryList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-            const target = inquiryList.find(item => item.id === id);
-            
-            if(target) {
-                document.getElementById('modal-q-text').innerText = `질문: ${target.content}`;
-                document.getElementById('replyText').value = '';
-                document.getElementById('replyModal').style.display = 'flex';
-            }
+            const inquiries = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+            const item = inquiries.find(i => i.id === id);
+            document.getElementById('modal-q-text').innerText = "질문: " + item.content;
+            document.getElementById('replyText').value = '';
+            document.getElementById('replyModal').style.display = 'flex';
         }
 
-        // 모달 닫기
-        function closeModal() {
-            document.getElementById('replyModal').style.display = 'none';
-            currentReplyId = null;
-        }
+        function closeModal() { document.getElementById('replyModal').style.display = 'none'; }
 
-        // 답변 등록 처리
         function submitReply() {
-            if (!currentReplyId) return;
-            const replyContent = document.getElementById('replyText').value;
-            if (!replyContent.trim()) {
-                alert("답변 내용을 입력해주세요.");
-                return;
-            }
+            const answer = document.getElementById('replyText').value;
+            if (!answer.trim()) return alert("내용을 입력하세요.");
 
-            let inquiryList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-            const updatedList = inquiryList.map(item => {
-                if (item.id === currentReplyId) {
-                    return { 
-                        ...item, 
-                        status: 'done',      // 상태 변경
-                        answer: replyContent // 답변 저장
-                    };
-                }
-                return item;
-            });
-
-            localStorage.setItem('inquiryList', JSON.stringify(updatedList));
-            alert("✅ 답변이 등록되었습니다.");
+            let inquiries = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+            inquiries = inquiries.map(item => item.id === currentReplyId ? { ...item, status: 'done', answer: answer } : item);
+            localStorage.setItem('inquiryList', JSON.stringify(inquiries));
+            
+            alert("답변이 등록되었습니다.");
             closeModal();
-            loadInquiries(); // 리스트 새로고침
+            loadInquiries();
         }
 
-        // 초기 로드
-        window.onload = function() {
-            loadCertifications();
-        };
+        window.onload = loadCertifications;
     </script>
 </body>
 </html>
