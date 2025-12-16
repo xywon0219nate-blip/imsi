@@ -6,7 +6,6 @@
   <title>마이페이지 | FindMyRide</title>
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
   <style>
-    /* ... 기존 CSS ... */
     :root {
       --main-blue: #457b9d;
       --light-blue: #a8dadc;
@@ -25,9 +24,11 @@
       padding: 15px 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
     }
     .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; z-index: 1002; margin-right: auto; }
+    
     .nav-links { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }
     .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 16px; transition: color 0.2s; }
     .nav-links a:hover, .nav-links a.active { color: var(--main-blue); }
+
     .hamburger { display: none; cursor: pointer; font-size: 24px; color: var(--dark-blue); z-index: 1002; background: none; border: none; padding: 5px; }
 
     @media (max-width: 768px) {
@@ -48,7 +49,7 @@
       display: flex; flex-direction: column; gap: 30px;
     }
 
-    /* 프로필 & 통계 카드 */
+    /* 프로필 카드 */
     .profile-card {
       background: var(--card-bg); border-radius: 20px; padding: 40px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 30px; position: relative;
@@ -72,7 +73,8 @@
     .profile-info p { font-size: 14px; color: var(--text-gray); }
     #file-input { display: none; }
 
-    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    /* 통계 대시보드 */
+    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
     .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .stat-card {
       background: var(--card-bg); padding: 25px; border-radius: 16px;
@@ -84,11 +86,11 @@
     .stat-value { font-size: 24px; font-weight: 800; color: var(--dark-blue); }
     .stat-unit { font-size: 14px; font-weight: normal; color: var(--text-gray); }
 
-    /* 즐겨찾기 목록 */
+    /* 즐겨찾기 섹션 */
     .favorites-group { margin-bottom: 30px; }
     .sub-title { font-size: 16px; font-weight: bold; color: var(--main-blue); margin-bottom: 10px; display: block; }
     
-    .favorites-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .favorites-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
     
     .fav-item {
       background: var(--card-bg); padding: 20px; border-radius: 12px;
@@ -141,8 +143,8 @@
         <input type="file" id="file-input" accept="image/*" onchange="changeProfile(this)">
       </div>
       <div class="profile-info">
-        <h2><span id="user-name">로그인 필요</span> <span class="level-badge" id="level-badge">🌱 Lv.1</span></h2>
-        <p id="user-email">로그인 후 이용해주세요</p>
+        <h2><span id="user-name">로딩 중...</span> <span class="level-badge" id="level-badge">🌱 Lv.1</span></h2>
+        <p id="user-email">잠시만 기다려주세요</p>
       </div>
     </div>
 
@@ -201,16 +203,16 @@
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // ==========================================
-    // [필수] 본인의 Firebase 키를 여기에 입력하세요!
+    // [수정됨] Index.html과 동일한 진짜 키 적용!
     // ==========================================
     const firebaseConfig = {
-            apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
-            authDomain: "capstone-a39ed.firebaseapp.com",
-            projectId: "capstone-a39ed",
-            storageBucket: "capstone-a39ed.firebasestorage.app",
-            messagingSenderId: "522941456140",
-            appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
-        };
+        apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
+        authDomain: "capstone-a39ed.firebaseapp.com",
+        projectId: "capstone-a39ed",
+        storageBucket: "capstone-a39ed.firebasestorage.app",
+        messagingSenderId: "522941456140",
+        appId: "1:522941456140:web:fe8095ecfc82bd756d3329"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -254,9 +256,10 @@
             document.getElementById('today-steps').innerText = (savedDate === today) ? (localStorage.getItem('pedometerSteps') || 0) : 0;
 
             loadMyFavorites();
-            loadRecycleFavorites(); // [NEW] 자원 회수기 즐겨찾기 로드
+            loadRecycleFavorites(); 
 
         } else {
+            // 로그인 안 된 상태일 때
             alert("로그인이 필요한 페이지입니다.");
             location.href = 'Index.html';
         }
@@ -306,7 +309,7 @@
         }
     }
 
-    // 2. [NEW] 자원 회수기 즐겨찾기 로드
+    // 2. 자원 회수기 즐겨찾기 로드
     function loadRecycleFavorites() {
         const listEl = document.getElementById('recycleFavList');
         const favs = JSON.parse(localStorage.getItem(RECYCLE_FAV_KEY)) || [];
@@ -340,7 +343,6 @@
         if (storedFavs.length === 0) document.getElementById('favList').innerHTML = '<div class="empty-msg">즐겨찾기한 대여소가 없습니다.</div>';
     }
 
-    // [NEW] 자원 회수기 삭제 함수
     window.removeRecycleFav = function(placeId, btn) {
         if (!confirm('삭제하시겠습니까?')) return;
         let favs = JSON.parse(localStorage.getItem(RECYCLE_FAV_KEY)) || [];
