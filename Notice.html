@@ -3,189 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>관리자 페이지 - FindMyRide</title>
+    <title>고객센터 - FindMyRide</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
-        body { font-family: 'Pretendard', sans-serif; background: #1e293b; color: white; padding: 40px; max-width: 900px; margin: 0 auto; }
-        
-        /* 탭 스타일 */
-        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid #475569; padding-bottom: 10px; }
-        .tab-btn {
-            background: none; border: none; color: #94a3b8; font-size: 1.1rem; font-weight: bold; cursor: pointer; padding: 10px;
+        :root {
+            --main-blue: #457b9d;
+            --dark-blue: #1d3557;
+            --bg-color: #fafafa;
+            --border-color: #e0e0e0;
         }
-        .tab-btn.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { background-color: var(--bg-color); color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* 헤더 */
+        header {
+            width: 100%; background: #fff; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--dark-blue); text-decoration: none; }
+        .nav-links { display: flex; gap: 30px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--dark-blue); font-weight: 600; }
+        .nav-links a.active { color: var(--main-blue); }
+
+        /* 컨테이너 */
+        .container {
+            flex: 1; max-width: 900px; margin: 40px auto; width: 90%;
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .page-title { font-size: 2rem; color: var(--dark-blue); margin-bottom: 10px; border-bottom: 3px solid var(--main-blue); display: inline-block; padding-bottom: 5px; }
+        .page-desc { color: #666; margin-bottom: 20px; }
+
+        /* 탭 메뉴 */
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #eee; }
+        .tab-btn {
+            padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer;
+            border: none; background: none; color: #999;
+        }
+        .tab-btn.active { color: var(--main-blue); border-bottom: 3px solid var(--main-blue); }
+
+        /* 버튼 및 검색창 */
+        .action-bar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--main-blue); color: white; }
+        .btn-write { background: var(--dark-blue); color: white; display: none; }
 
         /* 리스트 스타일 */
-        .list-item {
-            background: #334155; padding: 20px; border-radius: 12px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center; gap: 20px;
+        .list-wrap { list-style: none; border-top: 2px solid var(--dark-blue); }
+        .list-item { border-bottom: 1px solid var(--border-color); }
+        .list-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 15px; cursor: pointer; transition: background 0.2s;
         }
-        .info-container { flex: 1; }
-        .title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
-        .sub-text { font-size: 0.9rem; color: #94a3b8; margin-bottom: 5px; }
-        .q-text { background: #1e293b; padding: 10px; border-radius: 6px; font-size: 0.95rem; color: #e2e8f0; margin-top: 5px; }
-        .a-text { color: #38bdf8; margin-top: 5px; font-weight: bold; }
+        .list-header:hover { background-color: #f8fbff; }
+        .info-group { display: flex; gap: 15px; align-items: center; flex: 1; overflow: hidden; }
+        .title-text { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; }
+        .badge.notice { background: var(--main-blue); }
+        .badge.wait { background: #95a5a6; }
+        .badge.done { background: var(--main-blue); }
 
-        /* 이미지 스타일 */
-        .proof-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid #475569; }
+        /* 내용 박스 */
+        .content-box { display: none; padding: 25px; background-color: #f9fafb; border-top: 1px solid #eee; line-height: 1.6; }
+        .list-item.active .content-box { display: block; }
+        .admin-reply { margin-top: 20px; padding: 15px; background: #eef4fa; border-left: 4px solid var(--main-blue); border-radius: 4px; }
 
-        /* 버튼 */
-        button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-approve { background: #22c55e; color: white; }
-        .btn-reply { background: #38bdf8; color: white; }
-        .btn-done { background: #64748b; color: #cbd5e1; cursor: default; }
+        /* 탭 컨텐츠 */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         /* 모달 */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000;
         }
-        .modal-box { background: #1e293b; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; border: 1px solid #475569; }
-        .modal-textarea { width: 100%; height: 100px; margin: 15px 0; background: #334155; color: white; border: 1px solid #475569; padding: 10px; resize: none; }
-        .modal-btns { display: flex; justify-content: flex-end; gap: 10px; }
-        
-        .empty-msg { text-align: center; color: #94a3b8; margin-top: 30px; }
-        .back-link { display: block; margin-top: 30px; color: #38bdf8; text-align: center; text-decoration: none; }
+        .modal-box { background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; }
+        .form-input, .form-textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-textarea { height: 150px; resize: none; }
+
+        footer { text-align: center; padding: 40px; background: var(--dark-blue); color: white; margin-top: auto; }
     </style>
 </head>
 <body>
-    <h1 style="border-bottom: 1px solid #475569; padding-bottom: 20px;">🛡️ 관리자 페이지</h1>
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('cert')">인증 승인</button>
-        <button class="tab-btn" onclick="switchTab('inquiry')">1:1 문의 관리</button>
-    </div>
 
-    <div id="tab-cert" class="tab-content active">
-        <div id="cert-list"></div>
-    </div>
+    <header>
+        <a href="Index.html" class="logo">FindMyRide</a>
+        <ul class="nav-links">
+            <li><a href="Index.html">홈</a></li>
+            <li><a href="Notice.html" class="active">고객센터</a></li>
+        </ul>
+    </header>
 
-    <div id="tab-inquiry" class="tab-content">
-        <div id="inquiry-list"></div>
-    </div>
+    <div class="container">
+        <h1 class="page-title">고객센터</h1>
+        <p class="page-desc">공지사항을 확인하거나 1:1 문의를 남겨주세요.</p>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('notice')">공지사항</button>
+            <button class="tab-btn" onclick="switchTab('qna')">1:1 문의</button>
+        </div>
 
-    <a href="Notice.html" class="back-link">← 사용자 페이지(Notice.html)로 이동</a>
+        <div class="action-bar">
+            <div></div> <button class="btn btn-write" id="writeBtn" onclick="openModal()">문의 작성</button>
+        </div>
 
-    <div class="modal-overlay" id="replyModal">
-        <div class="modal-box">
-            <h3>답변 작성하기</h3>
-            <p id="modal-q-text" style="font-size:0.9rem; color:#94a3b8; margin-top:10px;"></p>
-            <textarea id="replyText" class="modal-textarea" placeholder="답변을 입력하세요"></textarea>
-            <div class="modal-btns">
-                <button onclick="closeModal()" style="background:#ef4444; color:white;">취소</button>
-                <button onclick="submitReply()" style="background:#38bdf8; color:white;">등록</button>
-            </div>
+        <div id="notice-tab" class="tab-content active">
+            <ul class="list-wrap">
+                <li class="list-item" onclick="toggleItem(this)">
+                    <div class="list-header">
+                        <div class="info-group"><span class="badge notice">필독</span><span class="title-text">안전한 자전거 이용 수칙 5계명</span></div>
+                        <span>2025.06.01</span>
+                    </div>
+                    <div class="content-box">
+                        <p>1. 안전모 착용 필수<br>2. 음주 운전 금지<br>3. 횡단보도에서는 끌고 가기<br>4. 이어폰 사용 자제<br>5. 야간 라이트 켜기</p>
+                    </div>
+                </li>
+                <li class="list-item" onclick="toggleItem(this)">
+                    <div class="list-header">
+                        <div class="info-group"><span class="badge notice">정보</span><span class="title-text">'제로웨이스트'란 무엇인가요?</span></div>
+                        <span>2025.05.28</span>
+                    </div>
+                    <div class="content-box">
+                        <p>쓰레기를 매립지나 소각장으로 보내지 않고, 자원을 순환시키는 원칙입니다.<br>텀블러, 장바구니, 자전거 이용으로 실천해보세요!</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="qna-tab" class="tab-content">
+            <ul class="list-wrap" id="qna-list">
+                </ul>
+            <div id="empty-msg" style="text-align:center; padding:30px; color:#999; display:none;">작성된 문의 내역이 없습니다.</div>
         </div>
     </div>
 
+    <div class="modal-overlay" id="inquiryModal">
+        <div class="modal-box">
+            <h2 style="margin-bottom:20px;">문의하기</h2>
+            <form id="inquiryForm" onsubmit="submitInquiry(event)">
+                <input type="text" class="form-input" id="qTitle" placeholder="제목" required>
+                <textarea class="form-textarea" id="qContent" placeholder="내용을 입력하세요" required></textarea>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn" onclick="closeModal()" style="background:#eee;">취소</button>
+                    <button type="submit" class="btn btn-primary">등록하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>캡스톤디자인 4차산업혁명 융합프로젝트2</p>
+    </footer>
+
     <script>
-        let currentReplyId = null;
+        // 초기 로드 시 문의 내역 불러오기
+        window.onload = function() {
+            loadInquiries();
+        };
+
+        function toggleItem(element) { element.classList.toggle('active'); }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            if (tabName === 'cert') {
+            
+            if (tabName === 'notice') {
                 document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('tab-cert').classList.add('active');
-                loadCertifications();
+                document.getElementById('notice-tab').classList.add('active');
+                document.getElementById('writeBtn').style.display = 'none';
             } else {
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('tab-inquiry').classList.add('active');
-                loadInquiries();
+                document.getElementById('qna-tab').classList.add('active');
+                document.getElementById('writeBtn').style.display = 'block';
             }
         }
 
-        // --- 1. 인증 승인 로직 ---
-        function loadCertifications() {
-            const list = document.getElementById('cert-list');
-            const reviewList = JSON.parse(localStorage.getItem('reviewList') || '[]');
-            const pending = reviewList.filter(i => i.status === 'pending');
+        function openModal() { document.getElementById('inquiryModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('inquiryModal').style.display = 'none'; }
 
-            if (pending.length === 0) { list.innerHTML = "<div class='empty-msg'>대기 중인 인증 요청이 없습니다.</div>"; return; }
-
-            let html = '';
-            pending.forEach(item => {
-                html += `
-                    <div class="list-item">
-                        <img src="${item.image}" class="proof-img" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
-                        <div class="info-container">
-                            <div class="title">${item.name}</div>
-                            <div class="sub-text">${item.date} | ${item.point}g</div>
-                        </div>
-                        <button class="btn-approve" onclick="approveCert(${item.id})">승인</button>
-                    </div>`;
-            });
-            list.innerHTML = html;
-        }
-
-        function approveCert(id) {
-            let list = JSON.parse(localStorage.getItem('reviewList') || '[]');
-            list = list.map(item => item.id === id ? { ...item, status: 'approved' } : item);
-            localStorage.setItem('reviewList', JSON.stringify(list));
-            alert("승인되었습니다.");
-            loadCertifications();
-        }
-
-        // --- 2. 문의 답변 로직 ---
-        function loadInquiries() {
-            const list = document.getElementById('inquiry-list');
-            const inquiries = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+        // [핵심] 문의 저장 함수 (localStorage 연동)
+        function submitInquiry(e) {
+            e.preventDefault();
+            const title = document.getElementById('qTitle').value;
+            const content = document.getElementById('qContent').value;
             
-            // 답변 대기중인 것을 위로 정렬
-            inquiries.sort((a, b) => (a.status === 'wait' ? -1 : 1));
+            const newInquiry = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: new Date().toLocaleDateString('ko-KR'),
+                status: 'wait',
+                answer: ''
+            };
 
-            if (inquiries.length === 0) { list.innerHTML = "<div class='empty-msg'>등록된 문의가 없습니다.</div>"; return; }
+            const inquiryList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+            inquiryList.unshift(newInquiry);
+            localStorage.setItem('inquiryList', JSON.stringify(inquiryList));
 
-            let html = '';
-            inquiries.forEach(item => {
-                const isWait = item.status === 'wait';
-                const btn = isWait 
-                    ? `<button class="btn-reply" onclick="openModal(${item.id})">답변하기</button>` 
-                    : `<button class="btn-done" disabled>완료됨</button>`;
-
-                html += `
-                    <div class="list-item">
-                        <div class="info-container">
-                            <div class="sub-text">${isWait ? '🔴 대기중' : '🔵 답변완료'} | ${item.date}</div>
-                            <div class="title">${item.title}</div>
-                            <div class="q-text">Q. ${item.content}</div>
-                            ${!isWait ? `<div class="a-text">A. ${item.answer}</div>` : ''}
-                        </div>
-                        ${btn}
-                    </div>`;
-            });
-            list.innerHTML = html;
-        }
-
-        function openModal(id) {
-            currentReplyId = id;
-            const inquiries = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-            const item = inquiries.find(i => i.id === id);
-            document.getElementById('modal-q-text').innerText = "질문: " + item.content;
-            document.getElementById('replyText').value = '';
-            document.getElementById('replyModal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('replyModal').style.display = 'none'; }
-
-        function submitReply() {
-            const answer = document.getElementById('replyText').value;
-            if (!answer.trim()) return alert("내용을 입력하세요.");
-
-            let inquiries = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-            inquiries = inquiries.map(item => item.id === currentReplyId ? { ...item, status: 'done', answer: answer } : item);
-            localStorage.setItem('inquiryList', JSON.stringify(inquiries));
-            
-            alert("답변이 등록되었습니다.");
+            alert('문의가 등록되었습니다.');
+            document.getElementById('inquiryForm').reset();
             closeModal();
-            loadInquiries();
+            loadInquiries(); // 리스트 갱신
+            switchTab('qna'); // 탭 이동
         }
 
-        window.onload = loadCertifications;
+        // [핵심] 문의 내역 불러오기 함수
+        function loadInquiries() {
+            const list = document.getElementById('qna-list');
+            const inquiryList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+            
+            if (inquiryList.length === 0) {
+                list.innerHTML = '';
+                document.getElementById('empty-msg').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('empty-msg').style.display = 'none';
+            let html = '';
+            
+            inquiryList.forEach(item => {
+                const badgeClass = item.status === 'wait' ? 'wait' : 'done';
+                const badgeText = item.status === 'wait' ? '답변대기' : '답변완료';
+                
+                // 답변이 있으면 표시, 없으면 안내 문구
+                let replyHtml = '';
+                if (item.status === 'done') {
+                    replyHtml = `<div class="admin-reply"><strong>A. 관리자 답변</strong><p>${item.answer}</p></div>`;
+                } else {
+                    replyHtml = `<div class="admin-reply" style="background:#f5f5f5; color:#888;"><p>관리자가 확인 중입니다.</p></div>`;
+                }
+
+                html += `
+                    <li class="list-item" onclick="toggleItem(this)">
+                        <div class="list-header">
+                            <div class="info-group">
+                                <span class="badge ${badgeClass}">${badgeText}</span>
+                                <span class="title-text">${item.title}</span>
+                            </div>
+                            <span style="font-size:0.9rem; color:#999;">${item.date}</span>
+                        </div>
+                        <div class="content-box">
+                            <p><strong>Q. 질문 내용:</strong></p>
+                            <p>${item.content}</p>
+                            ${replyHtml}
+                        </div>
+                    </li>
+                `;
+            });
+            list.innerHTML = html;
+        }
     </script>
 </body>
 </html>
