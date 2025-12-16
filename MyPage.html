@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>마이페이지 | FindMyRide</title>
+  <title>마이페이지</title>
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
   <style>
     :root {
@@ -183,9 +183,9 @@
       </div>
 
       <div class="favorites-group">
-          <span class="sub-title">♻️ 자원 회수 거점 <button onclick="location.href='recycle_map.html'" style="font-size:11px; padding:3px 8px; border:1px solid #ddd; background:white; border-radius:5px; cursor:pointer; margin-left:5px;">+ 추가</button></span>
+          <span class="sub-title">♻️재활용 장소<button onclick="location.href='recycle_map.html'" style="font-size:11px; padding:3px 8px; border:1px solid #ddd; background:white; border-radius:5px; cursor:pointer; margin-left:5px;">+ 추가</button></span>
           <div class="favorites-list" id="recycleFavList">
-            <div class="empty-msg">즐겨찾기한 회수기가 없습니다.</div>
+            <div class="empty-msg">즐겨찾기한 장소가 없습니다.</div>
           </div>
       </div>
     </div>
@@ -202,9 +202,6 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // ==========================================
-    // [수정됨] Index.html과 동일한 진짜 키 적용!
-    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyD26IjJXt-2N85EXKHBsxMnRyVgQ-ODByY",
         authDomain: "capstone-a39ed.firebaseapp.com",
@@ -309,13 +306,13 @@
         }
     }
 
-    // 2. 자원 회수기 즐겨찾기 로드
+    // 2. 재활용 장소 즐겨찾기 로드
     function loadRecycleFavorites() {
         const listEl = document.getElementById('recycleFavList');
         const favs = JSON.parse(localStorage.getItem(RECYCLE_FAV_KEY)) || [];
 
         if (favs.length === 0) {
-            listEl.innerHTML = '<div class="empty-msg">즐겨찾기한 회수기가 없습니다.</div>';
+            listEl.innerHTML = '<div class="empty-msg">즐겨찾기한 장소가 없습니다.</div>';
             return;
         }
 
