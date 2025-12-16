@@ -38,7 +38,7 @@
     }
     #map { width: 100%; height: 100%; }
 
-    /* --- [추가] 검색창 디자인 (test2.html과 동일) --- */
+    /* 검색창 디자인 (test2.html과 동일) */
     .search-wrapper {
         position: absolute;
         top: 20px; left: 50%; transform: translateX(-50%);
@@ -88,9 +88,9 @@
     }
     .search-btn:hover { background: var(--dark-blue); }
 
-    /* 필터 버튼 (위치 조정: 검색창 아래로) */
+    /* 필터 버튼 (검색창 아래 배치) */
     .category-filters {
-        position: absolute; top: 85px; /* 검색창 높이만큼 내림 */
+        position: absolute; top: 85px;
         left: 50%; transform: translateX(-50%);
         z-index: 90; display: flex; gap: 10px; width: auto;
         background: rgba(255,255,255,0.9); padding: 5px; border-radius: 50px;
@@ -111,7 +111,7 @@
         box-shadow: 0 4px 10px rgba(69, 123, 157, 0.3);
     }
 
-    /* 로딩 */
+    /* 로딩 메시지 */
     .loading-message {
       position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
       background: rgba(29, 53, 87, 0.95); padding: 12px 24px;
@@ -138,7 +138,6 @@
     }
     .overlay-title { font-weight: 700; color: var(--dark-blue); font-size: 16px; margin-right: 10px;}
     
-    /* 즐겨찾기 별 버튼 */
     .fav-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: #ccc; padding: 0; line-height: 1; }
     .fav-btn.active { color: #ffc107; }
 
@@ -183,7 +182,7 @@
   <section class="hero">
     <div class="search-wrapper">
         <div class="search-container">
-            <input type="text" id="keyword" placeholder="장소 검색 (예: 강남구 수거함)" 
+            <input type="text" id="keyword" placeholder="장소 검색 (예: 강남역, 홍대입구)" 
                    autocomplete="off" onkeypress="if(event.keyCode==13) performSearch();">
             <button class="search-btn" onclick="performSearch()">검색</button>
         </div>
@@ -240,47 +239,56 @@
         const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
         new kakao.maps.Marker({ map: map, position: locPosition, image: markerImage, title: '내 위치' });
 
+        // 초기 로딩 시 주변 데이터 검색
         searchPlaces(currCategory);
     }
 
-    // [변경] 카테고리 변경 시 검색창 초기화 및 검색
+    // 카테고리 버튼 클릭 시
     function changeCategory(keyword) {
         currCategory = keyword;
-        document.getElementById('keyword').value = ''; // 검색창 초기화
-        searchPlaces(keyword);
+        updateFilterButtons();
+        // 현재 지도 중심 기준으로 다시 검색
+        searchPlaces(currCategory);
     }
 
-    // [추가] 키워드 직접 검색 기능
+    // [핵심 변경] 검색창 입력 시 -> 장소 이동 후 해당 카테고리 검색
     function performSearch() {
         const keyword = document.getElementById('keyword').value.trim();
         if (!keyword) {
             alert('검색어를 입력해주세요!');
             return;
         }
-        // 필터 버튼 선택 해제
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        searchPlaces(keyword);
-    }
+        
+        // 1. 장소 검색 (예: 강남역)
+        ps.keywordSearch(keyword, function(data, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const targetLat = data[0].y;
+                const targetLng = data[0].x;
+                
+                // 2. 지도 이동
+                const moveLatLon = new kakao.maps.LatLng(targetLat, targetLng);
+                map.setCenter(moveLatLon);
+                map.setLevel(5); // 줌 레벨 조정
 
-    function searchPlaces(keyword) {
-        // 필터 버튼 스타일 업데이트 (카테고리 검색인 경우)
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            if(btn.innerText.includes(keyword) || (keyword === '주민센터' && btn.innerText.includes('폐건전지'))) {
-                btn.classList.add('active');
+                // 3. 이동한 곳에서 '현재 선택된 카테고리' 검색 (예: 강남역 주변 주민센터)
+                searchPlaces(currCategory);
             } else {
-                btn.classList.remove('active');
+                alert('검색 결과가 없습니다.');
             }
         });
+    }
 
+    // 실제 카테고리 데이터를 검색하고 마커를 찍는 함수
+    function searchPlaces(category) {
         const loading = document.getElementById('loadingMsg');
         loading.style.display = 'block';
-        loading.innerText = `'${keyword === '주민센터' ? '폐건전지 수거함' : keyword}' 검색 중...`;
+        loading.innerText = `'${category === '주민센터' ? '폐건전지 수거함' : category}' 검색 중...`;
 
+        // 현재 지도 중심 기준 반경 5km 검색
         const center = map.getCenter();
         const options = { location: center, radius: 5000, sort: kakao.maps.services.SortBy.DISTANCE };
         
-        // 키워드 검색 실행
-        ps.keywordSearch(keyword, placesSearchCB, options);
+        ps.keywordSearch(category, placesSearchCB, options);
     }
 
     function placesSearchCB(data, status, pagination) {
@@ -289,10 +297,11 @@
             currentSearchResults = data;
             displayPlaces(data);
         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-            alert(`주변 5km 내에 검색 결과가 없습니다.`);
+            alert(`이 지역 주변에는 '${currCategory}' 관련 장소가 없습니다.`);
             removeMarker();
         } else {
-            alert('검색 중 오류가 발생했습니다.');
+            // 오류 무시 (조용히 처리)
+            console.log('검색 실패');
         }
     }
 
@@ -316,11 +325,9 @@
         kakao.maps.event.addListener(marker, 'click', function() {
             closeOverlay();
             
-            // 즐겨찾기 여부 확인
             const favs = JSON.parse(localStorage.getItem(RECYCLE_FAV_KEY)) || [];
             const isFav = favs.some(f => f.id === place.id);
 
-            // [변경] x 버튼(닫기 버튼) HTML 제거
             const content = `
                 <div class="custom-overlay">
                     <div class="overlay-header">
@@ -357,6 +364,16 @@
             window.currentOverlay.setMap(null);
             window.currentOverlay = null;
         }
+    }
+
+    function updateFilterButtons() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            if(btn.innerText.includes(currCategory) || (currCategory === '주민센터' && btn.innerText.includes('폐건전지'))) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     }
 
     window.toggleFavorite = function(placeId, btn) {
