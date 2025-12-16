@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>만보기 - FindMyRide</title>
+    <title>걸음 수 측정</title>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
     <style>
         :root { --main-blue: #457b9d; --dark-blue: #1d3557; --bg-color: #fafafa; }
@@ -92,7 +92,7 @@
         <button class="start-btn" id="start-btn" onclick="requestPermission()">이어하기 / 시작하기</button>
         <button class="finish-btn" id="finish-btn" onclick="finishWalking()">포인트 받기</button>
 
-        <button class="dev-btn" onclick="incrementStep(100)">테스트용 +100걸음</button>
+        <button class="dev-btn" onclick="incrementStep(100)"웹 테스트</button>
     </div>
 
     <script>
@@ -142,7 +142,7 @@
         function startPedometer() {
             isRunning = true;
             document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('status-msg').innerHTML = "측정 중...🏃<br>화면을 켜두고 걸어주세요.";
+            document.getElementById('status-msg').innerHTML = "걷는 중...<br>화면이 켜진 상태로 걸어주세요.";
             window.addEventListener('devicemotion', handleMotion);
         }
 
