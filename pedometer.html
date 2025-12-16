@@ -71,7 +71,7 @@
 
     <header>
         <div class="back-btn" onclick="history.back()">←</div>
-        <div class="logo">만보기 모드</div>
+        <div class="logo">오늘의 걷기</div>
     </header>
 
     <div class="container">
@@ -79,7 +79,7 @@
             <div class="circle-bg" id="circle-border"></div>
             <div class="step-count-box">
                 <div class="step-number" id="step-display">0</div>
-                <div class="step-label">오늘의 걸음</div>
+                <div class="step-label">오늘의 걷기</div>
                 <div class="next-goal" id="next-goal-text">다음 보상까지 1000</div>
             </div>
         </div>
@@ -92,7 +92,7 @@
         <button class="start-btn" id="start-btn" onclick="requestPermission()">이어하기 / 시작하기</button>
         <button class="finish-btn" id="finish-btn" onclick="finishWalking()">포인트 받기</button>
 
-        <button class="dev-btn" onclick="incrementStep(100)">[Dev] 테스트용 +100걸음</button>
+        <button class="dev-btn" onclick="incrementStep(100)">테스트용 +100걸음</button>
     </div>
 
     <script>
