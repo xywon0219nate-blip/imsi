@@ -38,17 +38,68 @@
     }
     #map { width: 100%; height: 100%; }
 
-    /* 필터 버튼 */
+    /* --- [추가] 검색창 디자인 (test2.html과 동일) --- */
+    .search-wrapper {
+        position: absolute;
+        top: 20px; left: 50%; transform: translateX(-50%);
+        z-index: 100;
+        width: 90%; max-width: 420px;
+    }
+
+    .search-container {
+        background: #fff;
+        border-radius: 50px;
+        padding: 6px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        display: flex; 
+        align-items: center;
+        justify-content: space-between;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .search-container:focus-within {
+        border-color: var(--main-blue);
+        box-shadow: 0 6px 20px rgba(69, 123, 157, 0.2);
+    }
+    
+    #keyword {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 10px 15px;
+        font-size: 16px;
+        outline: none;
+        min-width: 0;
+    }
+    
+    .search-btn {
+        background: var(--main-blue);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 15px;
+        flex-shrink: 0;
+        transition: background 0.2s;
+        margin-left: 5px;
+    }
+    .search-btn:hover { background: var(--dark-blue); }
+
+    /* 필터 버튼 (위치 조정: 검색창 아래로) */
     .category-filters {
-        position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-        z-index: 100; display: flex; gap: 10px; width: auto;
+        position: absolute; top: 85px; /* 검색창 높이만큼 내림 */
+        left: 50%; transform: translateX(-50%);
+        z-index: 90; display: flex; gap: 10px; width: auto;
         background: rgba(255,255,255,0.9); padding: 5px; border-radius: 50px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     .filter-btn {
-        background: white; border: 1px solid #ddd; padding: 10px 20px;
-        border-radius: 30px; font-size: 15px; font-weight: 600; cursor: pointer;
+        background: white; border: 1px solid #ddd; padding: 8px 16px;
+        border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap;
         display: flex; align-items: center; gap: 6px; transition: all 0.2s;
         color: #555;
@@ -87,9 +138,9 @@
     }
     .overlay-title { font-weight: 700; color: var(--dark-blue); font-size: 16px; margin-right: 10px;}
     
-    /* [NEW] 즐겨찾기 별 버튼 */
+    /* 즐겨찾기 별 버튼 */
     .fav-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: #ccc; padding: 0; line-height: 1; }
-    .fav-btn.active { color: #ffc107; } /* 활성화 시 노란색 */
+    .fav-btn.active { color: #ffc107; }
 
     .overlay-addr { font-size: 13px; color: #666; margin-bottom: 10px; line-height: 1.4; }
     .overlay-link { 
@@ -110,7 +161,8 @@
         }
         .nav-links.active { right: 0; }
         .hamburger { display: block; margin-left: auto; }
-        .category-filters { width: 90%; background: rgba(255,255,255,0.9); box-shadow: 0 2px 10px rgba(0,0,0,0.1); justify-content: center; }
+        .category-filters { width: 90%; justify-content: center; }
+        .search-wrapper { width: 95%; }
     }
   </style>
 </head>
@@ -129,6 +181,14 @@
   </header>
 
   <section class="hero">
+    <div class="search-wrapper">
+        <div class="search-container">
+            <input type="text" id="keyword" placeholder="장소 검색 (예: 강남구 수거함)" 
+                   autocomplete="off" onkeypress="if(event.keyCode==13) performSearch();">
+            <button class="search-btn" onclick="performSearch()">검색</button>
+        </div>
+    </div>
+
     <div class="category-filters">
         <button class="filter-btn active" onclick="changeCategory('주민센터')"><span>🔋</span> 폐건전지(주민센터)</button>
         <button class="filter-btn" onclick="changeCategory('제로웨이스트')"><span>🌿</span> 제로웨이스트</button>
@@ -144,9 +204,9 @@
     let map, ps, currentOverlay = null;
     let markers = [];
     let currCategory = '주민센터'; 
-    let currentSearchResults = []; // 현재 검색된 장소 데이터 저장용
+    let currentSearchResults = []; 
 
-    const RECYCLE_FAV_KEY = 'findmyride_recycle_favorites'; // 자원회수기 전용 저장 키
+    const RECYCLE_FAV_KEY = 'findmyride_recycle_favorites';
 
     function toggleMenu() {
         const nav = document.getElementById('nav-links');
@@ -183,16 +243,32 @@
         searchPlaces(currCategory);
     }
 
+    // [변경] 카테고리 변경 시 검색창 초기화 및 검색
     function changeCategory(keyword) {
         currCategory = keyword;
+        document.getElementById('keyword').value = ''; // 검색창 초기화
+        searchPlaces(keyword);
+    }
+
+    // [추가] 키워드 직접 검색 기능
+    function performSearch() {
+        const keyword = document.getElementById('keyword').value.trim();
+        if (!keyword) {
+            alert('검색어를 입력해주세요!');
+            return;
+        }
+        // 필터 버튼 선택 해제
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
         searchPlaces(keyword);
     }
 
     function searchPlaces(keyword) {
+        // 필터 버튼 스타일 업데이트 (카테고리 검색인 경우)
         document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
             if(btn.innerText.includes(keyword) || (keyword === '주민센터' && btn.innerText.includes('폐건전지'))) {
                 btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
             }
         });
 
@@ -202,13 +278,15 @@
 
         const center = map.getCenter();
         const options = { location: center, radius: 5000, sort: kakao.maps.services.SortBy.DISTANCE };
+        
+        // 키워드 검색 실행
         ps.keywordSearch(keyword, placesSearchCB, options);
     }
 
     function placesSearchCB(data, status, pagination) {
         document.getElementById('loadingMsg').style.display = 'none';
         if (status === kakao.maps.services.Status.OK) {
-            currentSearchResults = data; // 데이터 전역 변수에 저장 (즐겨찾기용)
+            currentSearchResults = data;
             displayPlaces(data);
         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
             alert(`주변 5km 내에 검색 결과가 없습니다.`);
@@ -242,13 +320,13 @@
             const favs = JSON.parse(localStorage.getItem(RECYCLE_FAV_KEY)) || [];
             const isFav = favs.some(f => f.id === place.id);
 
+            // [변경] x 버튼(닫기 버튼) HTML 제거
             const content = `
                 <div class="custom-overlay">
                     <div class="overlay-header">
                         <span class="overlay-title">${place.place_name}</span>
                         <div style="display:flex; gap:8px;">
                             <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${place.id}', this)">${isFav ? '★' : '☆'}</button>
-                            <button class="close-btn" onclick="closeOverlay()">×</button>
                         </div>
                     </div>
                     <div class="overlay-addr">${place.road_address_name || place.address_name}</div>
@@ -281,22 +359,18 @@
         }
     }
 
-    // [NEW] 즐겨찾기 토글 함수
     window.toggleFavorite = function(placeId, btn) {
-        // 현재 검색된 목록에서 해당 장소 찾기
         const place = currentSearchResults.find(p => p.id === placeId);
-        if (!place) return; // 오류 방지
+        if (!place) return;
 
         let favs = JSON.parse(localStorage.getItem(RECYCLE_FAV_KEY)) || [];
         const existingIndex = favs.findIndex(f => f.id === placeId);
 
         if (existingIndex > -1) {
-            // 이미 있으면 삭제
             favs.splice(existingIndex, 1);
             btn.innerHTML = '☆';
             btn.classList.remove('active');
         } else {
-            // 없으면 추가 (필요한 정보만 저장)
             favs.push({
                 id: place.id,
                 place_name: place.place_name,
