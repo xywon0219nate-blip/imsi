@@ -117,7 +117,13 @@
         
         .dashboard-container { flex: 1; max-width: 1200px; margin: 40px auto; width: 90%; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
         .tree-section { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; border: 1px solid #eee; position: relative; overflow: hidden; }
-        #tree-display { font-size: 150px; margin: 30px 0; transition: transform 0.3s; cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
+        
+        /* [수정] cursor: pointer 제거 */
+        #tree-display { 
+            font-size: 150px; margin: 30px 0; transition: transform 0.3s; 
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); 
+        }
+        
         .grow-animation { transform: scale(1.2); }
         .score-badge { background-color: var(--light-blue); color: var(--dark-blue); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: inline-block; }
         .progress-container { width: 80%; background-color: #e5e7eb; border-radius: 15px; height: 30px; overflow: hidden; position: relative; margin-bottom: 10px; }
@@ -135,7 +141,6 @@
         .action-btn .label { font-size: 16px; font-weight: 700; color: var(--dark-blue); }
         .action-btn .sub { font-size: 13px; color: #888; margin-top: 4px; }
         
-        /* 전체 너비 버튼 (재활용 지도 등) */
         .full-width-btn { grid-column: span 2; }
 
         .admin-link { text-align: right; margin-top: 20px; font-size: 13px; color: #999; }
@@ -247,11 +252,10 @@
     <div id="dashboard-page" class="dashboard-container">
         <section class="tree-section">
             <div class="score-badge">오늘 줄인 탄소: <span id="score">0</span>g</div>
-            <div id="tree-display" onclick="pokeTree()">🌱</div>
+            <div id="tree-display">🌱</div>
             <h3 id="level-name">Level 1. 파릇파릇 새싹</h3>
             <div class="progress-container"><div id="progress-fill"></div><div id="progress-text">0%</div></div>
-            <p style="color:#888; font-size: 14px; margin-top:10px;">나무를 클릭해서 사랑을 주세요!</p>
-        </section>
+            </section>
         
         <section class="control-section">
             <div class="welcome-text"><h2>탄소 중립 미션 🌳</h2><p>5가지 활동으로 지구를 지켜주세요.</p></div>
@@ -451,7 +455,7 @@
             myScore += points;
             updateUI(myScore);
             showFloatingText(`+${points}g`);
-            window.pokeTree();
+            window.pokeTree(); // 포인트 적립 시 애니메이션은 유지
 
             const docRef = doc(db, "users", myUid);
             await updateDoc(docRef, { 
@@ -486,7 +490,7 @@
             myScore += points;
             updateUI(myScore);
             showFloatingText(`+${points}g`);
-            window.pokeTree();
+            window.pokeTree(); // 포인트 적립 시 애니메이션은 유지
             const docRef = doc(db, "users", myUid);
             await updateDoc(docRef, { totalScore: increment(points) });
         }
