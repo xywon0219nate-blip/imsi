@@ -24,7 +24,7 @@
             overflow-x: hidden; 
         }
 
-        /* 헤더 스타일 */
+        /* 헤더 */
         header {
             width: 100%; background: #fff; padding: 15px 30px;
             display: flex; align-items: center; justify-content: space-between;
@@ -68,7 +68,7 @@
             .auth-btn { padding: 6px 12px; font-size: 13px; white-space: nowrap; }
         }
 
-        /* --- [통합 모달 스타일] --- */
+        /* 통합 모달 스타일 */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.5); z-index: 2000;
@@ -93,7 +93,7 @@
         .btn-cancel { background: #f1f5f9; color: #64748b; }
         .btn-confirm { background: var(--main-blue); color: white; }
 
-        /* [NEW] 미션 선택 버튼 스타일 */
+        /* 미션 선택 */
         .mission-select-btn {
             display: flex; align-items: center; gap: 15px; width: 100%;
             background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px;
@@ -111,14 +111,13 @@
         .hero-title { font-size: 2.5rem; margin-bottom: 15px; line-height: 1.3; }
         .hero-title span { color: var(--tree-green); }
         .hero-desc { font-size: 1.1rem; color: #666; margin-bottom: 40px; max-width: 500px; line-height: 1.6; }
-        .hero-img { font-size: 120px; margin-bottom: 30px; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+        /* hero-img 스타일은 더 이상 사용되지 않지만 혹시 몰라 남겨두거나 삭제해도 무방합니다 */
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
         .dashboard-container { flex: 1; max-width: 1200px; margin: 40px auto; width: 90%; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
         .tree-section { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; border: 1px solid #eee; position: relative; overflow: hidden; }
         
-        /* [수정] cursor: pointer 제거 */
         #tree-display { 
             font-size: 150px; margin: 30px 0; transition: transform 0.3s; 
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); 
@@ -243,7 +242,6 @@
     </header>
 
     <div id="landing-page">
-        <div class="hero-img">🌍</div>
         <h1 class="hero-title">지구를 위한<br><span>가장 쉬운 실천</span></h1>
         <p class="hero-desc">FindMyRide와 함께 일상 속 탄소를 줄여보세요.<br>회원가입 후 나만의 나무를 키워보세요.</p>
         <button onclick="document.getElementById('signup-btn').click()" class="action-btn" style="background:var(--dark-blue); color:white; border:none; padding:15px 40px; font-size:18px; justify-content: center;">지금 바로 시작하기</button>
@@ -411,7 +409,7 @@
             }
         });
 
-        // 1. 미션 선택 팝업 (NEW)
+        // 사진 인증
         window.openMissionModal = function() {
             if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
             document.getElementById('mission-modal').classList.add('open');
@@ -423,7 +421,7 @@
             location.href = `mission.html?type=${type}`;
         }
 
-        // 2. 자전거 주행 인증 팝업
+        // 자전거 이동거리
         window.openRideModal = function() {
             if(!auth.currentUser) { alert("로그인이 필요합니다!"); return; }
             document.getElementById('ride-modal').classList.add('open');
